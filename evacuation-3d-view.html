@@ -93,7 +93,7 @@ const F={};let focus='f1',gapV=3.6,routesOn=true;
 const CW=64,CH=CW*1382/2140;
 const g2w=(gx,gy)=>[(gx*2/2140-.5)*CW,(gy*2/1382-.5)*CH];
 const BLD=[[70,100,140,155,3,'校舍'],[245,95,115,110,3,'校舍'],[370,95,115,110,3,'校舍'],[500,100,290,115,3,'教學大樓（示意位置）','tb'],[695,215,135,105,3,'教學大樓（示意位置）','tb'],[685,320,145,280,3,'教學大樓（示意位置）','tb'],[840,160,100,140,2,'禮堂']];
-const PINS=[[350,330,'指揮中心'],[480,380,'最終集合地點'],[545,343,'急救站'],[980,317,'警衛室'],[825,45,'交流門']];
+const PINS=[[350,330,'指揮中心'],[350,415,'防災倉庫'],[480,380,'最終集合地點'],[545,343,'急救站'],[980,317,'警衛室'],[825,45,'交流門']];
 let vid=0;function view(p,t,dur=700){if(Math.hypot(p[0]-t[0],p[2]-t[2])<1)cam.up.set(0,0,-1);else cam.up.set(0,1,0);const id=++vid,p0=cam.position.clone(),t0=ctl.target.clone(),t1=performance.now();
  (function s(){if(id!==vid)return;const k=Math.min(1,(performance.now()-t1)/dur),e=k*k*(3-2*k);cam.position.lerpVectors(p0,new THREE.Vector3(...p),e);ctl.target.lerpVectors(t0,new THREE.Vector3(...t),e);if(k<1)requestAnimationFrame(s)})()}
 async function init(){
