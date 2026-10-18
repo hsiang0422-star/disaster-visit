@@ -102,7 +102,7 @@ const S=40/1387,W1=1602,H1=952,KG=.36,GS=KG*(2*CW/2140)/S;
 const fx=(f,px)=>(f.s*px+f.tx-W1/2)*S,fz=(f,py)=>(f.s*py+f.ty-H1/2)*S;
 const BLD=[[70,100,140,155,3,'校舍'],[245,95,115,110,3,'校舍'],[370,95,115,110,3,'校舍'],[500,100,290,115,3,'教學大樓（示意位置）','tb'],[695,215,135,105,3,'教學大樓（示意位置）','tb'],[685,320,145,280,3,'教學大樓（示意位置）','tb'],[840,160,100,140,2,'禮堂']];
 const PINS=[[350,330,'指揮中心','command'],[350,415,'防災倉庫','warehouse'],[480,380,'最終集合地點','assembly'],[545,343,'急救站','firstaid'],[980,317,'警衛室','guard'],[825,45,'交流門','gate'],[397,328,'室外避難處','outdoor'],[660,190,'健康中心','health'],[907,273,'通訊設備放置點','comms'],[905,285,'救援器材放置點','rescue'],[950,342,'災時家長接送區','pickup']];
-let selectedFacility='',focus='all',wh=2,extra=0,routesOn=true,cWh=1.1;const FL=[];
+let selectedFacility='',focus='all',wh=2,extra=0,routesOn=true,cWh=1.1;const FL=[],campusTeachingVolumes=[];
 function view(p,t,dur=700){const id=++view.id,p0=cam.position.clone(),t0=ctl.target.clone(),t1=performance.now();
  (function s(){if(id!==view.id)return;const k=Math.min(1,(performance.now()-t1)/dur),e=k*k*(3-2*k);cam.position.lerpVectors(p0,new THREE.Vector3(...p),e);ctl.target.lerpVectors(t0,new THREE.Vector3(...t),e);if(k<1)requestAnimationFrame(s)})()}
 view.id=0;
@@ -118,7 +118,7 @@ async function init(){
   const ht=fl*.9,m=new THREE.Mesh(new THREE.BoxGeometry(x1-x0,ht,z1-z0),new THREE.MeshStandardMaterial({color:tag?0xd62820:0x4a78b5,transparent:true,opacity:tag?.62:.5}));
   m.position.set((x0+x1)/2,ht/2,(z0+z1)/2);m.userData={nm:tag?nm+'（點擊查看樓層）':nm,tag};
   m.add(new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry),new THREE.LineBasicMaterial({color:0x1d2733})));
-  walls.add(m);hits.push(m);if(tag){const target=new THREE.Mesh(new THREE.PlaneGeometry(x1-x0,z1-z0),new THREE.MeshBasicMaterial({transparent:true,opacity:0,colorWrite:false,depthWrite:false,side:THREE.DoubleSide}));target.rotation.x=-Math.PI/2;target.position.set((x0+x1)/2,.035,(z0+z1)/2);target.userData={nm:'教學大樓（點擊進入 3D）',tag:1};walls.add(target);hits.push(target)}
+  walls.add(m);hits.push(m);if(tag)campusTeachingVolumes.push(m);if(tag){const target=new THREE.Mesh(new THREE.PlaneGeometry(x1-x0,z1-z0),new THREE.MeshBasicMaterial({transparent:true,opacity:0,colorWrite:false,depthWrite:false,side:THREE.DoubleSide}));target.rotation.x=-Math.PI/2;target.position.set((x0+x1)/2,.035,(z0+z1)/2);target.userData={nm:'教學大樓（點擊進入 3D）',tag:1};walls.add(target);hits.push(target)}
   if(nm==='禮堂'){const l=label('禮堂',1.3);l.position.set(m.position.x,ht+1.2,m.position.z);walls.add(l)}else if(tag&&x===500){const l=label('教學大樓',1.5,'#fff','#d62820');l.position.set(m.position.x,ht+1.4,m.position.z);l.userData={nm:'教學大樓（點擊進入 3D）',tag:1};walls.add(l);hits.push(l)}});
  // building floors
  D.floors.forEach((f,i)=>{
@@ -158,7 +158,7 @@ function layout(){const h=mode==='campus'?cWh:wh,e=mode==='campus'?0:extra,isola
  FL.forEach((o,i)=>{let level=i;if(mode==='bld'&&center>=0&&focus!=='all'){const relative=(i-center+FL.length)%FL.length;level=relative===0?0:relative===1?1:-1}o.g.position.y=level*step+.2;o.g.visible=mode!=='bld'||focus==='all'||focus===o.k;o.wall.scale.y=h;
   const on=mode==='campus'||focus==='all'||focus===o.k;o.op=on?1:.06;
   [o.wm,o.sm,o.pm,o.rm].forEach(m=>{m.opacity=o.op});o.wm.depthWrite=o.sm.depthWrite=o.op>.5;
-  o.labs.visible=mode==='bld'&&on&&$('#k-lab').checked;o.labs.children.forEach(l=>l.position.y=h+.9);o.floorTag.visible=mode==='bld';o.floorTag.children.forEach(l=>l.position.y=h+.9)})}
+  o.labs.visible=mode==='bld'&&on&&$('#k-lab').checked;o.labs.children.forEach(l=>l.position.y=h+.9);o.floorTag.visible=mode==='bld'||mode==='campus';o.floorTag.children.forEach(l=>l.position.y=h+.9)})}
 function drawRoutes(o,t){const c=o.ctx,f=o.f;c.setLineDash([]);c.clearRect(0,0,f.W,f.H);
  if(routesOn&&o.op>.5){c.lineCap='round';c.lineJoin='round';
   o.paths.forEach(p=>{c.setLineDash([]);c.strokeStyle='rgba(214,40,32,.22)';c.lineWidth=11;c.stroke(p);c.strokeStyle='#d62820';c.lineWidth=5.5;c.setLineDash([16,11]);c.lineDashOffset=-t*26;c.stroke(p)});
@@ -166,7 +166,7 @@ function drawRoutes(o,t){const c=o.ctx,f=o.f;c.setLineDash([]);c.clearRect(0,0,f
  o.rt.needsUpdate=true}
 function updateFloorBadge(){const labels={all:'整棟',f1:'1F',f2:'2F',f3:'3F'};$('#floor-badge').textContent='教學大樓｜'+(labels[focus]||'整棟')+' 樓層圖'}
 function setMode(m){mode=m;$('#wait').classList.add('hide');$('#floor-badge').classList.toggle('hide',m!=='bld');if(m==='bld')updateFloorBadge();
- campus.visible=m==='campus';bld.visible=m==='bld';
+ campus.visible=m==='campus';bld.visible=m==='bld'||(m==='campus'&&walls.visible);campusTeachingVolumes.forEach(o=>o.visible=m!=='campus');
  renderer.domElement.style.display=m==='aer'?'none':'block';$('#aer').style.display=m==='aer'?'block':'none';
  $('#c-campus').classList.toggle('hide',m!=='campus');$('#c-bld').classList.toggle('hide',m!=='bld');$('#c-aer').classList.toggle('hide',m!=='aer');
  ['campus','bld','aer'].forEach(k=>$('#b-'+k).classList.toggle('on',k===m));
@@ -177,7 +177,7 @@ function setMode(m){mode=m;$('#wait').classList.add('hide');$('#floor-badge').cl
 function enterBuilding(){focus='all';document.querySelectorAll('[data-f]').forEach(b=>b.classList.toggle('on',b.dataset.f==='all'));setMode('bld')}
 $('#b-campus').onclick=()=>setMode('campus');$('#b-bld').onclick=()=>setMode('bld');$('#b-aer').onclick=()=>setMode('aer');
 $('#v-iso').onclick=()=>view([34,38,52],[0,0,2]);$('#v-top').onclick=()=>view([0,86,.1],[0,0,0]);
-$('#k-wall').onchange=e=>walls.visible=e.target.checked;$('#k-pin').onchange=e=>pins.visible=e.target.checked;
+$('#k-wall').onchange=e=>{walls.visible=e.target.checked;if(mode==='campus')bld.visible=e.target.checked};$('#k-pin').onchange=e=>pins.visible=e.target.checked;
 function focusFacility(key){const p=PINS.find(x=>x[3]===key),xy=p?[p[0],p[1]]:key==='wait2'?[770,169]:key==='wait3'?[770,128]:null;if(!xy)return;if(mode!=='campus')setMode('campus');selectedFacility=key;const[wx,wz]=g2w(...xy),offset=cam.position.clone().sub(ctl.target);offset.setLength(Math.min(44,Math.max(26,offset.length()*.62)));view([wx+offset.x,Math.max(10,offset.y),wz+offset.z],[wx,0,wz],750)}
 document.querySelectorAll('[data-facility]').forEach(b=>b.onclick=()=>focusFacility(b.dataset.facility));
 $('#v2-iso').onclick=()=>view([20,26,36],[0,2.5,0]);$('#v2-top').onclick=()=>view([0,52,.1],[0,0,0]);$('#v2-side').onclick=()=>view([0,wh*1.5+extra,48],[0,wh*1.5+extra,0]);
