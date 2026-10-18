@@ -44,7 +44,7 @@ button.on{background:var(--acc);border-color:var(--acc);color:#fff}.save-btn{bor
 </style></head><body>
 <header><h1>國立臺南特殊教育學校・互動式 3D 防災地圖</h1>
 <nav><button id="b-campus" class="on">校園</button><button id="b-bld">教學大樓 3D</button><button id="b-aer">空拍圖</button><button id="ctl-t" onclick="toggleCtl()">操作選項 ▸</button><button id="info-t" onclick="toggleInfo()">防救災資訊 ▸</button><button id="facility-t" onclick="toggleFacility()">設施定位 ▸</button><button id="save-pictures" class="save-btn" title="下載全部地圖底圖與目前 3D 畫面">⬇ 下載圖檔</button></nav></header>
-<div id="toolbar-panels" aria-label="操作選項、防救災資訊與設施定位"><div id="toolbar-drag-handle" aria-label="按住拖曳移動選項框">⠿　拖曳移動・右下角縮放<button id="toolbar-close" type="button" aria-label="關閉操作選項" title="關閉">×</button></div><div id="ctl-b" class="card toolbar-card hide">
+<div id="toolbar-panels" aria-label="操作選項、防救災資訊與設施定位"><div id="toolbar-drag-handle" aria-label="按住拖曳移動選項框">⠿　<span style="max-width:4em;white-space:normal;overflow-wrap:anywhere;word-break:break-all">拖曳移動・縮放</span><button id="toolbar-close" type="button" aria-label="關閉操作選項" title="關閉">×</button></div><div id="ctl-b" class="card toolbar-card hide">
 
 <div id="c-campus"><h3>校園 3D</h3><div class="mut">拖曳方式可分別選擇平移或旋轉；滾輪或雙指縮放。若要查看樓層，請點上方「教學大樓 3D」按鈕。</div>
 <div class="row"><button id="v-iso">斜視</button><button id="v-top">俯視</button><button class="mode-pan">拖曳：平移</button><button class="mode-rotate">拖曳：旋轉</button></div>
