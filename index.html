@@ -44,10 +44,13 @@ h3{font-size:16px;margin:0 0 8px}
 .lg s{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px;text-decoration:none}
 .c1{background:var(--grn)}.c2{background:var(--amb)}.c3{background:var(--red)}
 .two{display:grid;gap:12px}@media(min-width:720px){.two{grid-template-columns:1fr 1fr}}
+.flow-pair,.map-pair{grid-template-columns:minmax(0,1fr)}
 .map-pair{align-items:stretch}.map-pair>.card{margin:0;min-width:0}.map-preview{display:block;width:100%;height:clamp(280px,32vw,430px);border:1px solid var(--line);border-radius:10px;background:var(--bg)}
 .steps{display:grid;gap:8px;margin:0;padding:0;list-style:none;counter-reset:s}
 .steps li{counter-increment:s;padding-left:34px;position:relative;font-size:14.5px}
 .steps li::before{content:counter(s);position:absolute;left:0;top:1px;width:24px;height:24px;border-radius:50%;background:var(--amb);color:#fff;text-align:center;line-height:24px;font-size:13px;font-weight:700}
+.flow-steps{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 18px}.flow-steps li{padding:10px 12px 10px 44px;background:var(--bg);border:1px solid var(--line);border-radius:10px;line-height:1.55;min-height:48px}.flow-steps li::before{left:10px;top:10px}
+@media(max-width:719px){.flow-steps{grid-template-columns:minmax(0,1fr)}}
 .sc{background:var(--amb2);border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:15px}
 .sc b{font-size:20px}
 .fl{margin:10px 0}.fl h3{display:flex;justify-content:space-between;align-items:baseline}.fl h3 small{font-weight:400;color:var(--mute)}
@@ -168,8 +171,8 @@ footer{margin-top:30px;font-size:12.5px;color:var(--mute);text-align:center}
 
 <h2 id="s3"><b>參</b>逃生路線</h2>
 <div class="sc"><b>演練情境</b>　上課時地震發生，花蓮外海規模 <b>6.8</b>，本校最大震度 <b>5</b> 級，搖晃約 <b>40</b> 秒。<br>狀況演練：教學大樓 1F 景觀電梯旁樓梯口有學生被玻璃割傷左手，血流不止，需緊急救治。</div>
-<div class="two">
-<div class="card"><h3>演練流程</h3><ol class="steps">
+<div class="two flow-pair">
+<div class="card flow-card"><h3>演練流程</h3><ol class="steps flow-steps">
 <li><b>室內（各班）</b>：老師聽到警報立即帶學生趴、掩、穩，採低姿勢，老師自己也做動作</li>
 <li><b>指揮官</b>用對講機請學務處廣播，緊急應變小組攜帶物品到健康中心前廣場集合</li>
 <li>清點應變小組人數後，<b>避難引導組</b>先確認疏散動線安全並回報指揮官</li>
