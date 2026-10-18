@@ -153,7 +153,7 @@ async function init(){
 function pose(){if(mode==='campus'){const[px,pz]=g2w(500+(H1/2-45)*KG,100+(1500-W1/2)*KG);bld.rotation.y=Math.PI/2;bld.scale.setScalar(GS);bld.position.set(px,0,pz)}
  else{bld.rotation.y=0;bld.scale.setScalar(1);bld.position.set(0,0,0)}}
 function layout(){const h=mode==='campus'?cWh:wh,e=mode==='campus'?0:extra,isolated=mode==='bld'&&focus!=='all',center=isolated?FL.findIndex(o=>o.k===focus):-1,step=h+(isolated?2.2:.2)+e;
- FL.forEach((o,i)=>{let level=i;if(mode==='bld'&&center>=0&&focus!=='all'){const relative=(i-center+FL.length)%FL.length;level=relative===0?0:relative===1?1:-1}o.g.position.y=level*step+.2;o.wall.scale.y=h;
+ FL.forEach((o,i)=>{let level=i;if(mode==='bld'&&center>=0&&focus!=='all'){const relative=(i-center+FL.length)%FL.length;level=relative===0?0:relative===1?1:-1}o.g.position.y=level*step+.2;o.g.visible=mode!=='bld'||focus==='all'||focus===o.k;o.wall.scale.y=h;
   const on=mode==='campus'||focus==='all'||focus===o.k;o.op=on?1:.06;
   [o.wm,o.sm,o.pm,o.rm].forEach(m=>{m.opacity=o.op});o.wm.depthWrite=o.sm.depthWrite=o.op>.5;
   o.labs.visible=mode==='bld'&&on&&$('#k-lab').checked;o.labs.children.forEach(l=>l.position.y=h+.9);o.floorTag.visible=mode==='bld';o.floorTag.children.forEach(l=>l.position.y=h+.9)})}
