@@ -52,7 +52,7 @@ button.on{background:var(--acc);border-color:var(--acc);color:#fff}.save-btn{bor
 <div class="row"><button data-f="all" class="on">整棟</button><button data-f="f3">3F</button><button data-f="f2">2F</button><button data-f="f1">1F</button></div>
 <div class="row mut">牆高 <input type="range" id="wh" min="1" max="4" step="0.1" value="2"></div>
 <div class="row mut">樓層分離 <input type="range" id="gap" min="0" max="8" step="0.1" value="0"></div>
-<div class="row"><label class="mut"><input type="checkbox" id="k-route" checked> 避難動線</label><label class="mut"><input type="checkbox" id="k-tex" checked> 平面圖貼圖</label><label class="mut"><input type="checkbox" id="k-lab" checked> 房名</label></div>
+<div class="row"><label class="mut"><input type="checkbox" id="k-route" checked> 避難動線與10位循環行人</label><label class="mut"><input type="checkbox" id="k-tex" checked> 平面圖貼圖</label><label class="mut"><input type="checkbox" id="k-lab" checked> 房名</label></div>
 <div class="row"><button id="v2-iso">斜視</button><button id="v2-top">俯視</button><button id="v2-side">側視</button><button class="pan">拖曳：平移</button></div></div>
 <div id="c-aer" class="hide"><h3>空拍圖</h3><div class="mut">拖曳平移、滾輪或雙指縮放。</div><div class="row"><button id="z-in">放大</button><button id="z-out">縮小</button><button id="z-rst">還原</button></div></div>
 </div><div id="info-b" class="card toolbar-card hide">
@@ -141,6 +141,26 @@ function initWalkers(){
   walkers.push({...w,curve,length,approach,approachLength:approach.getLength(),slot,depart:routeIndex*.42+pathIndex*.06,speed,pathIndex,step:i*.71,travelled:false});
  }
 }
+const floorEvacuationWalkers=[],routeSvg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+routeSvg.setAttribute('aria-hidden','true');routeSvg.style.cssText='position:fixed;width:1px;height:1px;left:-10px;top:-10px;overflow:hidden;visibility:hidden;pointer-events:none';document.body.append(routeSvg);
+function initFloorWalkers(o,floorIndex){
+ const paths=o.f.routes.map(d=>{const p=document.createElementNS('http://www.w3.org/2000/svg','path');p.setAttribute('d',d);routeSvg.append(p);const length=p.getTotalLength();return {p,length,worldLength:length*o.f.s*S}}).filter(r=>r.length>0);
+ const group=new THREE.Group();group.visible=false;o.g.add(group);o.floorWalkers=group;
+ for(let i=0;i<10;i++){
+  const route=paths[Math.min(paths.length-1,Math.floor(i*paths.length/10))],w=makeWalker(),phase=((i*.173+floorIndex*.117)%1);
+  w.person.scale.setScalar(.62);group.add(w.person);
+  floorEvacuationWalkers.push({person:w.person,arms:w.arms,legs:w.legs,route,f:o.f,phase,step:i*.83});
+ }
+}
+function animateFloorWalkers(t){
+ floorEvacuationWalkers.forEach(w=>{
+  const cycle=w.route.worldLength,speed=.82,progress=((t*speed+w.phase*cycle)%cycle)/cycle,distance=progress*w.route.length,p=w.route.p.getPointAtLength(distance),ahead=w.route.p.getPointAtLength((distance+Math.min(3,w.route.length*.015))%w.route.length);
+  const x=fx(w.f,p.x),z=fz(w.f,p.y),dx=fx(w.f,ahead.x)-x,dz=fz(w.f,ahead.y)-z,s=Math.sin(t*8+w.step);
+  w.person.visible=progress>.012&&progress<.988;
+  w.person.position.set(x,.12,z);w.person.rotation.y=Math.atan2(dx,dz);
+  w.arms[0].rotation.x=s*.5;w.arms[1].rotation.x=-s*.5;w.legs[0].rotation.x=-s*.62;w.legs[1].rotation.x=s*.62;
+ });
+}
 let selectedFacility='',focus='all',wh=2,extra=0,routesOn=true,cWh=1.1;const FL=[],campusTeachingVolumes=[];
 function view(p,t,dur=700){const id=++view.id,p0=cam.position.clone(),t0=ctl.target.clone(),t1=performance.now();
  (function s(){if(id!==view.id)return;const k=Math.min(1,(performance.now()-t1)/dur),e=k*k*(3-2*k);cam.position.lerpVectors(p0,new THREE.Vector3(...p),e);ctl.target.lerpVectors(t0,new THREE.Vector3(...t),e);if(k<1)requestAnimationFrame(s)})()}
@@ -179,7 +199,7 @@ async function init(){
   if(f.k==='f3'){const rescue=label('等待救援點',1.2,'#286744','rgba(238,247,238,.98)');rescue.position.set(fx(f,1768),0,fz(f,792));labs.add(rescue)}
   const floorTag=new THREE.Group(),ft=label(['1F','2F','3F'][i],2,'#fff','#1d2733');ft.position.set(fx(f,60),0,fz(f,H1*.62));floorTag.add(ft);
   g.add(slab,plane,wall,rp,labs,floorTag);bld.add(g);
-  FL.push({f,g,wall,slab,wm,sm,pm,rm,rt,c,ctx:c.getContext('2d'),labs,floorTag,plane,paths:f.routes.map(d=>new Path2D(d)),op:1,k:f.k})});
+  const floor={f,g,wall,slab,wm,sm,pm,rm,rt,c,ctx:c.getContext('2d'),labs,floorTag,plane,paths:f.routes.map(d=>new Path2D(d)),op:1,k:f.k};FL.push(floor);initFloorWalkers(floor,i)});
  // 校園 3D 模式的教學大樓屋頂，依 3F 平面輪廓建立
  const rf=D.floors[2],roofMat=new THREE.MeshStandardMaterial({color:0x65788a,roughness:.72,metalness:.04,transparent:true,opacity:.96,side:THREE.DoubleSide});
  roof=new THREE.InstancedMesh(unit(-.5),roofMat,rf.fp.length);inst(roof,rf.fp,3,rf,.16);roof.userData={nm:'教學大樓屋頂',tag:1};roof.renderOrder=4;bld.add(roof);
@@ -202,7 +222,7 @@ function layout(){const h=mode==='campus'?cWh:wh,e=mode==='campus'?0:extra,isola
  FL.forEach((o,i)=>{let level=i;if(mode==='bld'&&center>=0&&focus!=='all'){const relative=(i-center+FL.length)%FL.length;level=relative===0?0:relative===1?1:-1}o.g.position.y=level*step+.2;o.g.visible=mode!=='bld'||focus==='all'||focus===o.k;o.wall.scale.y=h;
   const on=mode==='campus'||focus==='all'||focus===o.k;o.op=on?1:.06;
   [o.wm,o.sm,o.pm,o.rm].forEach(m=>{m.opacity=o.op});o.wm.depthWrite=o.sm.depthWrite=o.op>.5;
-  o.labs.visible=mode==='bld'&&on&&$('#k-lab').checked;o.labs.children.forEach(l=>l.position.y=h+.9);o.floorTag.visible=mode==='bld'||mode==='campus';o.floorTag.children.forEach(l=>l.position.y=h+.9)});if(roof){roof.position.y=(FL[2]?.g.position.y||0)+h;roof.visible=mode==='campus'&&$('#k-roof').checked&&walls.visible}}
+  o.labs.visible=mode==='bld'&&on&&$('#k-lab').checked;o.labs.children.forEach(l=>l.position.y=h+.9);o.floorTag.visible=mode==='bld'||mode==='campus';o.floorTag.children.forEach(l=>l.position.y=h+.9);if(o.floorWalkers)o.floorWalkers.visible=mode==='bld'&&on&&routesOn});if(roof){roof.position.y=(FL[2]?.g.position.y||0)+h;roof.visible=mode==='campus'&&$('#k-roof').checked&&walls.visible}}
 function drawRoutes(o,t){const c=o.ctx,f=o.f;c.setLineDash([]);c.clearRect(0,0,f.W,f.H);
  if(routesOn&&o.op>.5){c.lineCap='round';c.lineJoin='round';
   o.paths.forEach(p=>{c.setLineDash([]);c.strokeStyle='rgba(214,40,32,.22)';c.lineWidth=11;c.stroke(p);c.strokeStyle='#d62820';c.lineWidth=5.5;c.setLineDash([16,11]);c.lineDashOffset=-t*26;c.stroke(p)});
@@ -229,7 +249,7 @@ document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{focus=b.dataset.
  if(focus!=='all'){const f=FL.find(o=>o.k===focus).f,d=Math.max(f.W*f.s*S/(2*tan*aspect),f.H*f.s*S/(2*tan))*1.12,cx=fx(f,f.W/2),cz=fz(f,f.H/2),cy=.2+wh*.45;view([cx,cy+d,cz+.01],[cx,cy,cz])}
  else{const mid=(FL.length-1)*(wh+.2+extra)/2+.2,f=FL[0].f,w=Math.max(...FL.map(o=>o.f.W*o.f.s*S)),h=Math.max(...FL.map(o=>o.f.H*o.f.s*S)),d=Math.max(w/(2*tan*aspect),h/(2*tan))*1.12;view([0,mid+d,0.01],[0,mid,0])}});
 $('#wh').oninput=e=>{wh=+e.target.value;layout()};$('#gap').oninput=e=>{extra=+e.target.value;layout()};
-$('#k-route').onchange=e=>routesOn=e.target.checked;
+$('#k-route').onchange=e=>{routesOn=e.target.checked;layout()};
 $('#k-tex').onchange=e=>FL.forEach(o=>o.plane.visible=e.target.checked);
 $('#k-lab').onchange=()=>layout();
 const ray=new THREE.Raycaster(),mp=new THREE.Vector2(),tip=$('#tip');let down=null;
@@ -269,6 +289,7 @@ function loop(){requestAnimationFrame(loop);const t=reduce?0:performance.now()/1
    w.person.position.set(p.x,.045+(s?Math.abs(s)*.018:0),p.z);w.person.rotation.y=Math.atan2(d.x,d.z);
    w.arms[0].rotation.x=s*.62;w.arms[1].rotation.x=-s*.62;w.legs[0].rotation.x=-s*.72;w.legs[1].rotation.x=s*.72;
   })}
+ if(mode==='bld'&&routesOn)animateFloorWalkers(t);
  if(mode!=='aer'){FL.forEach(o=>drawRoutes(o,t));renderer.render(scene,cam)}}
 function imageBytes(src){const raw=atob(src.slice(src.indexOf(',')+1)),out=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)out[i]=raw.charCodeAt(i);return out}
 function imageZip(entries){
