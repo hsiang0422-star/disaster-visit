@@ -28,6 +28,7 @@ button.on{background:var(--acc);border-color:var(--acc);color:#fff}
 #info-t,#ctl-t{width:auto;text-align:center}
 #info-b,#ctl-b{margin-top:6px}
 .row{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0;align-items:center}
+.facility-tools{border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:8px}.facility-tools summary{font-weight:600;cursor:pointer}
 .mut{color:var(--mut);font-size:12px}
 #tip{position:absolute;pointer-events:none;background:#000c;color:#fff;padding:2px 8px;border-radius:4px;font-size:12px;display:none}
 #aer{position:absolute;inset:0;overflow:hidden;display:none;background:#000;touch-action:none;cursor:grab}
@@ -38,9 +39,10 @@ button.on{background:var(--acc);border-color:var(--acc);color:#fff}
 <header><h1>國立臺南特殊教育學校・互動式 3D 防災地圖</h1>
 <nav><button id="b-campus" class="on">校園</button><button id="b-bld">教學大樓 3D</button><button id="b-aer">空拍圖</button><button id="ctl-t" onclick="toggleCtl()">操作選項 ▸</button><button id="info-t" onclick="toggleInfo()">防救災資訊 ▸</button></nav></header>
 <div id="toolbar-panels" aria-label="操作選項與防救災資訊"><div id="ctl-b" class="card toolbar-card hide">
+<details open class="facility-tools"><summary>設施定位</summary><div class="mut">從其他視圖使用定位時，地圖會切換至校園 3D；AED、滅火器與消防栓的位置資料待補。</div><div class="row"><button data-facility="outdoor">室外避難處</button><button data-facility="command">指揮中心</button><button data-facility="firstaid">急救站</button><button data-facility="health">健康中心</button><button data-facility="warehouse">防災倉庫</button><button data-facility="rescue">救援器材</button><button data-facility="comms">通訊設備</button><button data-facility="guard">警衛室</button><button data-facility="pickup">家長接送區</button><button data-facility="assembly">最終集合地點</button><button data-facility="wait2">2F等待救援區</button><button data-facility="wait3">3F等待救援區</button><button disabled title="提供AED位置後即可加入定位">AED（待補位置）</button></div></details>
 <div id="c-campus"><h3>校園 3D</h3><div class="mut">按住拖曳＝平移、滾輪或雙指縮放；按「拖曳」按鈕可切換旋轉。點「教學大樓」進入樓層。</div>
 <div class="row"><button id="v-iso">斜視</button><button id="v-top">俯視</button><button class="pan">拖曳：平移</button></div>
-<div class="row"><label class="mut"><input type="checkbox" id="k-wall" checked> 建築量體</label><label class="mut"><input type="checkbox" id="k-pin" checked> 設施標示</label></div><div class="mut">設施定位按鈕可移至地圖位置；AED、滅火器與消防栓的位置資料待補。</div><details open class="facility-tools"><summary>設施定位</summary><div class="row"><button data-facility="outdoor">室外避難處</button><button data-facility="command">指揮中心</button><button data-facility="firstaid">急救站</button><button data-facility="health">健康中心</button><button data-facility="warehouse">防災倉庫</button><button data-facility="rescue">救援器材</button><button data-facility="comms">通訊設備</button><button data-facility="guard">警衛室</button><button data-facility="pickup">家長接送區</button><button data-facility="assembly">最終集合地點</button><button data-facility="wait2">2F等待救援區</button><button data-facility="wait3">3F等待救援區</button><button disabled title="提供AED位置後即可加入定位">AED（待補位置）</button></div></details></div>
+<div class="row"><label class="mut"><input type="checkbox" id="k-wall" checked> 建築量體</label><label class="mut"><input type="checkbox" id="k-pin" checked> 設施標示</label></div></div>
 <div id="c-bld" class="hide"><h3>教學大樓 1F–3F</h3>
 <div class="row"><button data-f="all" class="on">整棟</button><button data-f="f3">3F</button><button data-f="f2">2F</button><button data-f="f1">1F</button></div>
 <div class="row mut">牆高 <input type="range" id="wh" min="1" max="4" step="0.1" value="2"></div>
