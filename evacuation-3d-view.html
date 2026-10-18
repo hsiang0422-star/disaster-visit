@@ -47,7 +47,7 @@ button.on{background:var(--acc);border-color:var(--acc);color:#fff}.save-btn{bor
 
 <div id="c-campus"><h3>校園 3D</h3><div class="mut">按住拖曳＝平移、滾輪或雙指縮放；按「拖曳」按鈕可切換旋轉。若要查看樓層，請點上方「教學大樓 3D」按鈕。</div>
 <div class="row"><button id="v-iso">斜視</button><button id="v-top">俯視</button><button class="pan">拖曳：平移</button></div>
-<div class="row"><label class="mut"><input type="checkbox" id="k-wall" checked> 建築量體</label><label class="mut"><input type="checkbox" id="k-pin" checked> 設施標示</label><label class="mut"><input type="checkbox" id="k-roof" checked> 教學大樓屋頂</label></div></div>
+<div class="row"><label class="mut"><input type="checkbox" id="k-wall" checked> 建築量體</label><label class="mut"><input type="checkbox" id="k-pin" checked> 設施標示</label><label class="mut"><input type="checkbox" id="k-roof" checked> 教學大樓屋頂</label><label class="mut"><input type="checkbox" id="k-walk" checked> 疏散人流</label></div></div>
 <div id="c-bld" class="hide"><h3>教學大樓 1F–3F</h3>
 <div class="row"><button data-f="all" class="on">整棟</button><button data-f="f3">3F</button><button data-f="f2">2F</button><button data-f="f1">1F</button></div>
 <div class="row mut">牆高 <input type="range" id="wh" min="1" max="4" step="0.1" value="2"></div>
@@ -103,13 +103,30 @@ function label(txt,sz=1.6,col='#1d2733',bg='rgba(255,255,255,.88)'){
  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthTest:false}));
  s.scale.set(sz*4,sz,1);s.renderOrder=10;return s}
 function leader(x,z,fromY,toY){const h=Math.max(.05,toY-fromY),make=(r,c)=>new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,10),new THREE.MeshBasicMaterial({color:c,depthTest:false}));const edge=make(.13,0x173b32),core=make(.065,0xffd43b);[edge,core].forEach(m=>{m.position.set(x,fromY+h/2,z);m.renderOrder=9;pins.add(m)});const dot=new THREE.Mesh(new THREE.SphereGeometry(.2,12,8),new THREE.MeshBasicMaterial({color:0x173b32,depthTest:false})),center=new THREE.Mesh(new THREE.SphereGeometry(.11,12,8),new THREE.MeshBasicMaterial({color:0xffd43b,depthTest:false}));[dot,center].forEach(m=>{m.position.set(x,fromY,z);m.renderOrder=9;pins.add(m)})}
-let mode='campus',campus=new THREE.Group(),bld=new THREE.Group(),walls=new THREE.Group(),pins=new THREE.Group(),hits=[],rings=[],waits=[],bhits=[],roof=null;
-scene.add(campus,bld);campus.add(walls,pins);
+let mode='campus',campus=new THREE.Group(),bld=new THREE.Group(),walls=new THREE.Group(),pins=new THREE.Group(),walkersLayer=new THREE.Group(),hits=[],rings=[],waits=[],bhits=[],roof=null,walkers=[];
+scene.add(campus,bld);campus.add(walls,pins,walkersLayer);
 const CW=64,CH=CW*1382/2140,g2w=(gx,gy)=>[(gx*2/2140-.5)*CW,(gy*2/1382-.5)*CH];
 const S=40/1387,W1=1602,H1=952,KG=.36,GS=KG*(2*CW/2140)/S;
 const fx=(f,px)=>(f.s*px+f.tx-W1/2)*S,fz=(f,py)=>(f.s*py+f.ty-H1/2)*S;
 const BLD=[[70,100,140,155,3,'校舍'],[245,95,115,110,3,'校舍'],[370,95,115,110,3,'校舍'],[500,100,290,115,3,'教學大樓（示意位置）','tb'],[695,215,135,105,3,'教學大樓（示意位置）','tb'],[685,320,145,280,3,'教學大樓（示意位置）','tb'],[840,160,100,140,2,'禮堂']];
 const PINS=[[350,330,'指揮中心','command'],[350,415,'防災倉庫','warehouse'],[480,380,'最終集合地點','assembly'],[545,343,'急救站','firstaid'],[980,317,'警衛室','guard'],[825,45,'交流門','gate'],[397,328,'室外避難處','outdoor'],[660,190,'健康中心','health'],[907,273,'通訊設備放置點','comms'],[905,285,'救援器材放置點','rescue'],[950,342,'災時家長接送區','pickup']];
+const evacuationPaths=[[[244,298],[244,486],[416,486],[570,580],[720,646],[862,700]],[[625,421],[625,535],[674,590],[766,648],[862,700]],[[980,168],[980,410],[980,532],[934,610],[862,700]],[[1283,529],[1196,594],[1108,649],[1001,681],[862,700]]];
+function makeWalker(){
+ const person=new THREE.Group(),skin=new THREE.MeshBasicMaterial({color:0xffd9ae}),vest=new THREE.MeshBasicMaterial({color:0xf08a24}),pants=new THREE.MeshBasicMaterial({color:0x234c78}),outline=new THREE.MeshBasicMaterial({color:0xffffff});
+ const part=(geo,mat)=>{const m=new THREE.Mesh(geo,mat);m.renderOrder=6;person.add(m);return m};
+ part(new THREE.SphereGeometry(.095,12,10),outline).position.set(0,.62,0);
+ part(new THREE.SphereGeometry(.069,12,10),skin).position.set(0,.62,.015);
+ part(new THREE.CylinderGeometry(.125,.16,.29,10),vest).position.set(0,.405,0);
+ const arm=(x)=>{const pivot=new THREE.Group();pivot.position.set(x,.51,0);const m=new THREE.Mesh(new THREE.CylinderGeometry(.045,.055,.23,8),vest);m.position.y=-.115;m.renderOrder=6;pivot.add(m);person.add(pivot);return pivot};
+ const leg=(x)=>{const pivot=new THREE.Group();pivot.position.set(x,.27,0);const m=new THREE.Mesh(new THREE.CylinderGeometry(.05,.06,.24,8),pants);m.position.y=-.12;m.renderOrder=6;pivot.add(m);person.add(pivot);return pivot};
+ const shadow=new THREE.Mesh(new THREE.CircleGeometry(.16,16),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.8,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.015;shadow.renderOrder=5;person.add(shadow);
+ return {person,arms:[arm(-.17),arm(.17)],legs:[leg(-.075),leg(.075)]}
+}
+function initWalkers(){
+ evacuationPaths.forEach((points,pathIndex)=>{const curve=new THREE.CatmullRomCurve3(points.map(([x,y])=>{const [wx,wz]=g2w(x,y);return new THREE.Vector3(wx,0,wz)}),false,'centripetal'),length=curve.getLength();
+  [0,.5].forEach((phase,i)=>{const w=makeWalker();w.person.scale.setScalar(.72);walkersLayer.add(w.person);walkers.push({...w,curve,length,phase,pathIndex,step:i*Math.PI})})
+ })
+}
 let selectedFacility='',focus='all',wh=2,extra=0,routesOn=true,cWh=1.1;const FL=[],campusTeachingVolumes=[];
 function view(p,t,dur=700){const id=++view.id,p0=cam.position.clone(),t0=ctl.target.clone(),t1=performance.now();
  (function s(){if(id!==view.id)return;const k=Math.min(1,(performance.now()-t1)/dur),e=k*k*(3-2*k);cam.position.lerpVectors(p0,new THREE.Vector3(...p),e);ctl.target.lerpVectors(t0,new THREE.Vector3(...t),e);if(k<1)requestAnimationFrame(s)})()}
@@ -122,6 +139,7 @@ async function init(){
  $('#aerimg').src=D.img.aerial;
  const gt=new THREE.Mesh(new THREE.PlaneGeometry(CW,CH),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cm)}));gt.rotation.x=-Math.PI/2;campus.add(gt);
  const slab0=new THREE.Mesh(new THREE.BoxGeometry(CW,.4,CH),new THREE.MeshStandardMaterial({color:0x8a949e}));slab0.position.y=-.21;campus.add(slab0);
+ initWalkers();
  BLD.forEach(b=>{const[x,y,w,h,fl,nm,tag]=b;const[x0,z0]=g2w(x,y),[x1,z1]=g2w(x+w,y+h);
   const ht=fl*.9,m=new THREE.Mesh(new THREE.BoxGeometry(x1-x0,ht,z1-z0),new THREE.MeshStandardMaterial({color:tag?0xd62820:0x4a78b5,transparent:true,opacity:tag?.62:.5}));
   m.position.set((x0+x1)/2,ht/2,(z0+z1)/2);m.userData={nm,tag};
@@ -188,7 +206,7 @@ function setMode(m){mode=m;$('#wait').classList.add('hide');$('#floor-badge').cl
  if(m==='aer')resetAer()}
 $('#b-campus').onclick=()=>setMode('campus');$('#b-bld').onclick=()=>setMode('bld');$('#b-aer').onclick=()=>setMode('aer');
 $('#v-iso').onclick=()=>view([34,38,52],[0,0,2]);$('#v-top').onclick=()=>view([0,86,.1],[0,0,0]);
-$('#k-wall').onchange=e=>{walls.visible=e.target.checked;if(mode==='campus')bld.visible=e.target.checked;layout()};$('#k-pin').onchange=e=>pins.visible=e.target.checked;$('#k-roof').onchange=()=>layout();
+$('#k-wall').onchange=e=>{walls.visible=e.target.checked;if(mode==='campus')bld.visible=e.target.checked;layout()};$('#k-pin').onchange=e=>pins.visible=e.target.checked;$('#k-roof').onchange=()=>layout();$('#k-walk').onchange=e=>walkersLayer.visible=e.target.checked;
 function focusFacility(key){const p=PINS.find(x=>x[3]===key),xy=p?[p[0],p[1]]:key==='wait2'?[770,169]:key==='wait3'?[770,128]:null;if(!xy)return;if(mode!=='campus')setMode('campus');selectedFacility=key;const[wx,wz]=g2w(...xy),offset=cam.position.clone().sub(ctl.target);offset.setLength(Math.min(44,Math.max(26,offset.length()*.62)));view([wx+offset.x,Math.max(10,offset.y),wz+offset.z],[wx,0,wz],750)}
 document.querySelectorAll('[data-facility]').forEach(b=>b.onclick=()=>focusFacility(b.dataset.facility));
 $('#v2-iso').onclick=()=>view([20,26,36],[0,2.5,0]);$('#v2-top').onclick=()=>view([0,52,.1],[0,0,0]);$('#v2-side').onclick=()=>view([0,wh*1.5+extra,48],[0,wh*1.5+extra,0]);
@@ -224,7 +242,8 @@ function resize(){const w=stage.clientWidth,h=stage.clientHeight;renderer.setSiz
 new ResizeObserver(resize).observe(stage);
 const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
 function loop(){requestAnimationFrame(loop);const t=reduce?0:performance.now()/1000;ctl.update();
- if(mode==='campus')rings.forEach((r,i)=>{const k=(t*.6+i*.2)%1;r.scale.setScalar(1+k*(r.userData.pinKey===selectedFacility?9:(r.userData.s||4)));r.material.opacity=.9*(1-k)});
+ if(mode==='campus'){rings.forEach((r,i)=>{const k=(t*.6+i*.2)%1;r.scale.setScalar(1+k*(r.userData.pinKey===selectedFacility?9:(r.userData.s||4)));r.material.opacity=.9*(1-k)});
+  if(walkersLayer.visible)walkers.forEach(w=>{const u=reduce?w.phase:(t*1.15/w.length+w.phase)%1,p=w.curve.getPointAt(u),d=w.curve.getTangentAt(u),s=reduce?0:Math.sin(t*8+w.step);w.person.position.set(p.x,.045+(reduce?0:Math.abs(s)*.018),p.z);w.person.rotation.y=Math.atan2(d.x,d.z);w.arms[0].rotation.x=s*.62;w.arms[1].rotation.x=-s*.62;w.legs[0].rotation.x=-s*.72;w.legs[1].rotation.x=s*.72})}
  if(mode!=='aer'){FL.forEach(o=>drawRoutes(o,t));renderer.render(scene,cam)}}
 function imageBytes(src){const raw=atob(src.slice(src.indexOf(',')+1)),out=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)out[i]=raw.charCodeAt(i);return out}
 function imageZip(entries){
