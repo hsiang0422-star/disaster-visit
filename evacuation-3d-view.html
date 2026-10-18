@@ -92,6 +92,7 @@ function label(txt,sz=1.6,col='#1d2733',bg='rgba(255,255,255,.88)'){
  x.fillStyle=col;x.textAlign='center';x.textBaseline='middle';x.fillText(txt,256,66);
  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthTest:false}));
  s.scale.set(sz*4,sz,1);s.renderOrder=10;return s}
+function leader(x,z,fromY,toY){const h=Math.max(.05,toY-fromY),m=new THREE.Mesh(new THREE.CylinderGeometry(.045,.045,h,8),new THREE.MeshBasicMaterial({color:0xffcc33,depthTest:false}));m.position.set(x,fromY+h/2,z);m.renderOrder=9;pins.add(m);const d=new THREE.Mesh(new THREE.SphereGeometry(.13,12,8),new THREE.MeshBasicMaterial({color:0xffcc33,depthTest:false}));d.position.set(x,fromY,z);d.renderOrder=9;pins.add(d)}
 let mode='campus',campus=new THREE.Group(),bld=new THREE.Group(),walls=new THREE.Group(),pins=new THREE.Group(),hits=[],rings=[],waits=[],bhits=[];
 scene.add(campus,bld);campus.add(walls,pins);
 const CW=64,CH=CW*1382/2140,g2w=(gx,gy)=>[(gx*2/2140-.5)*CW,(gy*2/1382-.5)*CH];
@@ -141,9 +142,9 @@ async function init(){
   const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');x.fillStyle='#2e9e4f';x.fillRect(0,0,128,128);x.strokeStyle='#fff';x.lineWidth=8;x.strokeRect(6,6,116,116);x.fillStyle='#fff';x.font='bold 64px sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText(nm.slice(0,2),64,68);
   const sq=new THREE.Mesh(new THREE.PlaneGeometry(1.7,1.7),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(c)}));sq.rotation.x=-Math.PI/2;sq.position.set(wx,ry,wz);
   const rg=new THREE.Mesh(new THREE.RingGeometry(1,1.2,40),new THREE.MeshBasicMaterial({color:0x2e9e4f,transparent:true,side:THREE.DoubleSide}));rg.rotation.x=-Math.PI/2;rg.position.copy(sq.position);rg.userData={s:.9,pinKey:k==='f2'?'wait2':'wait3'};
-  const l=label(nm,1.2,'#fff','rgba(46,158,79,.95)');l.position.set(wx,ry+1.7,wz);
+  const l=label(nm,1.2,'#fff','rgba(46,158,79,.95)');l.position.set(wx,ry+1.7,wz);leader(wx,wz,ry,ry+1.1);
   [sq,l].forEach(o=>{o.userData={wait:k,nm};pins.add(o);waits.push(o)});pins.add(rg);rings.push(rg)});
- PINS.forEach(([x,y,nm,key])=>{const[wx,wz]=g2w(x,y);const l=label(nm,1.3,'#fff','rgba(20,110,60,.92)');l.position.set(wx,3.6,wz);pins.add(l);
+ PINS.forEach(([x,y,nm,key])=>{const[wx,wz]=g2w(x,y);const l=label(nm,1.3,'#fff','rgba(20,110,60,.92)');l.position.set(wx,3.6,wz);pins.add(l);leader(wx,wz,.18,2.95);
   const r=new THREE.Mesh(new THREE.RingGeometry(.5,.7,40),new THREE.MeshBasicMaterial({color:0x1fa35c,transparent:true,side:THREE.DoubleSide}));
   r.rotation.x=-Math.PI/2;r.position.set(wx,.06,wz);r.userData.pinKey=key;pins.add(r);rings.push(r)});
  
