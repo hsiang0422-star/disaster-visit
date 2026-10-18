@@ -125,7 +125,6 @@ function makeWalker(monochrome=false){
  part(new THREE.CylinderGeometry(.125,.16,.29,10),vest).position.set(0,.405,0);
  const arm=(x)=>{const pivot=new THREE.Group();pivot.position.set(x,.51,0);const m=new THREE.Mesh(new THREE.CylinderGeometry(.045,.055,.23,8),vest);m.position.y=-.115;m.renderOrder=6;pivot.add(m);person.add(pivot);return pivot};
  const leg=(x)=>{const pivot=new THREE.Group();pivot.position.set(x,.27,0);const m=new THREE.Mesh(new THREE.CylinderGeometry(.05,.06,.24,8),pants);m.position.y=-.12;m.renderOrder=6;pivot.add(m);person.add(pivot);return pivot};
- const shadow=new THREE.Mesh(new THREE.CircleGeometry(.16,16),new THREE.MeshBasicMaterial({color:monochrome?0x111111:0xffffff,transparent:true,opacity:.8,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.015;shadow.renderOrder=5;person.add(shadow);
  return {person,arms:[arm(-.17),arm(.17)],legs:[leg(-.075),leg(.075)]}
 }
 function initWalkers(){
