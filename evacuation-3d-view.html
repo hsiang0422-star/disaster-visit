@@ -12,7 +12,7 @@ h1{font-size:16px;margin:0}
 nav{display:flex;gap:6px}
 button{font:inherit;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:4px 10px;cursor:pointer}
 button.on{background:var(--acc);border-color:var(--acc);color:#fff}
-#stage{position:relative;flex:1;min-height:0}
+#map-layout{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:12px;padding:12px;flex:1;min-height:0}#stage{position:relative;min-width:0;min-height:0}#map-tools{display:flex;flex-direction:column;gap:10px;overflow:auto;min-width:0}#ctl,#info{position:static;max-width:none;width:100%}
 #stage canvas.gl{position:absolute;inset:0;width:100%;height:100%;display:block}
 .card{position:absolute;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;max-width:min(300px,calc(100% - 24px));box-shadow:0 2px 10px rgba(0,0,0,.12)}
 #ctl{left:10px;bottom:10px;max-width:min(260px,calc(100% - 24px));padding:7px 9px}
@@ -30,13 +30,16 @@ button.on{background:var(--acc);border-color:var(--acc);color:#fff}
 #wait .x{position:absolute;right:6px;top:4px;border:0;background:none;font-size:16px;padding:0 4px}
 #info-t,#ctl-t{width:100%;text-align:left}
 #info-b,#ctl-b{margin-top:6px}
-</style></head><body>
+@media(max-width:760px){html,body{height:auto;min-height:100%}body{min-height:100vh;overflow:auto}#map-layout{display:flex;flex-direction:column;overflow:visible}#stage{flex:none;height:58vh;min-height:360px}#map-tools{overflow:visible}}\n</style></head><body>
 <header><h1>國立臺南特殊教育學校・互動式 3D 防災地圖</h1>
 <nav><button id="b-campus" class="on">校園</button><button id="b-bld">教學大樓樓層</button><button id="b-aer">空拍圖</button></nav></header>
-<div id="stage">
+<div id="map-layout"><div id="stage">
 <div id="aer"><img id="aerimg" alt="校園空拍圖"></div>
 <div id="tip"></div>
-<div id="ctl" class="card"><button id="ctl-t" onclick="toggleCtl()">操作選項 ▸</button><div id="ctl-b" class="hide">
+
+<div id="wait" class="card hide"><button class="x" onclick="document.querySelector('#wait').classList.add('hide')" aria-label="關閉">×</button><h3 id="wait-t"></h3><div id="wait-d" class="mut"></div><div class="row"><button id="wait-go"></button></div></div>
+
+</div><aside id="map-tools" aria-label="防救災資訊與操作選項"><div id="ctl" class="card"><button id="ctl-t" onclick="toggleCtl()">操作選項 ▸</button><div id="ctl-b" class="hide">
 <div id="c-campus"><h3>校園 3D</h3><div class="mut">預設俯視；按住拖曳可平移地圖，滾輪或雙指縮放；按「拖曳：平移」可切換自由旋轉。點擊整個教學大樓區塊，開啟 1F–3F 樓層圖。</div>
 <div class="row"><button id="v-iso">斜視</button><button id="v-top">俯視</button><button class="pan">拖曳：旋轉</button><label class="mut"><input type="checkbox" id="k-wall" checked> 建築量體</label><label class="mut"><input type="checkbox" id="k-pin" checked> 設施標示</label></div></div>
 <div id="c-bld" class="hide"><h3>教學大樓 1F–3F</h3>
@@ -45,15 +48,12 @@ button.on{background:var(--acc);border-color:var(--acc);color:#fff}
 <div class="row"><label class="mut"><input type="checkbox" id="k-route" checked> 避難動線動畫</label></div>
 <div class="row"><button id="v2-top" class="on">俯視</button><button id="v2-iso">斜視</button><button id="v2-side">側視</button><button class="pan">平移模式 ✓</button></div></div>
 <div id="c-aer" class="hide"><h3>空拍圖</h3><div class="mut">拖曳平移・滾輪縮放。</div><div class="row"><button id="z-in">放大</button><button id="z-out">縮小</button><button id="z-rst">還原</button></div></div>
-</div></div>
-<div id="wait" class="card hide"><button class="x" onclick="document.querySelector('#wait').classList.add('hide')" aria-label="關閉">×</button><h3 id="wait-t"></h3><div id="wait-d" class="mut"></div><div class="row"><button id="wait-go"></button></div></div>
-<div id="info" class="card"><button id="info-t" onclick="toggleInfo()">防救災資訊（避難原則・通報單位） ▸</button><div id="info-b" class="hide">
+</div></div><div id="info" class="card"><button id="info-t" onclick="toggleInfo()">防救災資訊（避難原則・通報單位） ▸</button><div id="info-b" class="hide">
 <h3>各類災害避難原則</h3>
 <table><tr><td><b style="color:var(--acc)">地震</b></td><td>先避難，再疏散</td></tr><tr><td><b style="color:var(--acc)">淹水</b></td><td>垂直避難</td></tr><tr><td><b style="color:var(--acc)">海嘯</b></td><td>往高處避難</td></tr><tr><td><b style="color:var(--acc)">土石流</b></td><td>預防性撤離</td></tr></table>
 <h3 style="margin-top:8px">災害通報單位</h3>
 <table><tr><td>教育部校安中心</td><td>02-33437855／33437856</td></tr><tr><td>臺南市災害應變中心</td><td>06-2989119</td></tr><tr><td>安南區災害應變中心</td><td>06-2555667</td></tr><tr><td>國民及學前教育署</td><td>04-37061342</td></tr><tr><td>和順派出所</td><td>06-3554134</td></tr><tr><td>安和消防分隊</td><td>06-3551525</td></tr><tr><td>安南醫院</td><td>06-3553111</td></tr></table>
-<div class="mut" style="margin-top:4px">資料來源：校園防災地圖（地震災害）</div></div></div>
-</div>
+<div class="mut" style="margin-top:4px">資料來源：校園防災地圖（地震災害）</div></div></div></aside></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script>
