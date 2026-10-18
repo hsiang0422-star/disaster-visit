@@ -104,7 +104,7 @@ function label(txt,sz=1.6,col='#1d2733',bg='rgba(255,255,255,.88)'){
  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthTest:false}));
  s.scale.set(sz*4,sz,1);s.renderOrder=10;return s}
 function leader(x,z,fromY,toY){const h=Math.max(.05,toY-fromY),make=(r,c)=>new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,10),new THREE.MeshBasicMaterial({color:c,depthTest:false}));const edge=make(.13,0x173b32),core=make(.065,0xffd43b);[edge,core].forEach(m=>{m.position.set(x,fromY+h/2,z);m.renderOrder=9;pins.add(m)});const dot=new THREE.Mesh(new THREE.SphereGeometry(.2,12,8),new THREE.MeshBasicMaterial({color:0x173b32,depthTest:false})),center=new THREE.Mesh(new THREE.SphereGeometry(.11,12,8),new THREE.MeshBasicMaterial({color:0xffd43b,depthTest:false}));[dot,center].forEach(m=>{m.position.set(x,fromY,z);m.renderOrder=9;pins.add(m)})}
-let mode='campus',campus=new THREE.Group(),bld=new THREE.Group(),walls=new THREE.Group(),pins=new THREE.Group(),walkersLayer=new THREE.Group(),hits=[],rings=[],waits=[],bhits=[],roof=null,walkers=[];
+let mode='campus',campus=new THREE.Group(),bld=new THREE.Group(),walls=new THREE.Group(),pins=new THREE.Group(),walkersLayer=new THREE.Group(),hits=[],rings=[],waits=[],bhits=[],roof=null,walkers=[],walkerClockOrigin=0;
 scene.add(campus,bld);campus.add(walls,pins,walkersLayer);
 const CW=64,CH=CW*1382/2140,g2w=(gx,gy)=>[(gx*2/2140-.5)*CW,(gy*2/1382-.5)*CH];
 const S=40/1387,W1=1602,H1=952,KG=.36,GS=KG*(2*CW/2140)/S;
@@ -129,6 +129,7 @@ function makeWalker(monochrome=false){
  return {person,arms:[arm(-.17),arm(.17)],legs:[leg(-.075),leg(.075)]}
 }
 function initWalkers(){
+ walkerClockOrigin=performance.now()/1000;
  // 兩隊各 200 人：第二隊從使用者標出的右下方圓形轉角紅線先出發，第一隊再從小一甲出口跟上；兩隊依箭頭匯入同一集合點。
  const routeCurves=[evacuationPaths[0],evacuationPaths[2]].map(points=>new THREE.CatmullRomCurve3(points.map(([x,y])=>{const [wx,wz]=g2w(x/2,y/2);return new THREE.Vector3(wx,0,wz)}),false,'centripetal'));
  const queueCenter=g2w(480,447),forward=new THREE.Vector3(-.86,0,.51).normalize(),side=new THREE.Vector3(-forward.z,0,forward.x);
@@ -280,7 +281,7 @@ const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
 function loop(){requestAnimationFrame(loop);const t=reduce?0:performance.now()/1000;ctl.update();
  if(mode==='campus'){rings.forEach((r,i)=>{const k=(t*.6+i*.2)%1;r.scale.setScalar(1+k*(r.userData.pinKey===selectedFacility?9:(r.userData.s||4)));r.material.opacity=.9*(1-k)});
   if(walkersLayer.visible)walkers.forEach(w=>{
-   const elapsed=reduce?1e6:t-w.depart;
+   const elapsed=reduce?1e6:t-walkerClockOrigin-w.depart;
    if(elapsed<0){w.person.visible=false;return}w.person.visible=true;
    const routeTime=w.length/w.speed,queueTime=Math.max(.65,w.approachLength/w.speed),moving=elapsed<routeTime+queueTime;
    let p,d;
