@@ -40,7 +40,7 @@ button.on{background:var(--acc);border-color:var(--acc);color:#fff}
 <div id="toolbar-panels" aria-label="操作選項與防救災資訊"><div id="ctl-b" class="card toolbar-card hide">
 <div id="c-campus"><h3>校園 3D</h3><div class="mut">按住拖曳＝平移、滾輪或雙指縮放；按「拖曳」按鈕可切換旋轉。點「教學大樓」進入樓層。</div>
 <div class="row"><button id="v-iso">斜視</button><button id="v-top">俯視</button><button class="pan">拖曳：平移</button></div>
-<div class="row"><label class="mut"><input type="checkbox" id="k-wall" checked> 建築量體</label><label class="mut"><input type="checkbox" id="k-pin" checked> 設施標示</label></div></div>
+<div class="row"><label class="mut"><input type="checkbox" id="k-wall" checked> 建築量體</label><label class="mut"><input type="checkbox" id="k-pin" checked> 設施標示</label></div><div class="mut">地圖標示：健康中心、室外避難處、指揮中心、急救站、AED、防災倉庫、救援器材、通訊設備、警衛室、家長接送區及等待救援區。滅火器與消防栓依各棟平面圖內圖示標示。</div></div>
 <div id="c-bld" class="hide"><h3>教學大樓 1F–3F</h3>
 <div class="row"><button data-f="all" class="on">整棟</button><button data-f="f3">3F</button><button data-f="f2">2F</button><button data-f="f1">1F</button></div>
 <div class="row mut">牆高 <input type="range" id="wh" min="1" max="4" step="0.1" value="2"></div>
@@ -95,7 +95,7 @@ const CW=64,CH=CW*1382/2140,g2w=(gx,gy)=>[(gx*2/2140-.5)*CW,(gy*2/1382-.5)*CH];
 const S=40/1387,W1=1602,H1=952,KG=.36,GS=KG*(2*CW/2140)/S;
 const fx=(f,px)=>(f.s*px+f.tx-W1/2)*S,fz=(f,py)=>(f.s*py+f.ty-H1/2)*S;
 const BLD=[[70,100,140,155,3,'校舍'],[245,95,115,110,3,'校舍'],[370,95,115,110,3,'校舍'],[500,100,290,115,3,'教學大樓（示意位置）','tb'],[695,215,135,105,3,'教學大樓（示意位置）','tb'],[685,320,145,280,3,'教學大樓（示意位置）','tb'],[840,160,100,140,2,'禮堂']];
-const PINS=[[350,330,'指揮中心'],[350,415,'防災倉庫'],[480,380,'最終集合地點'],[545,343,'急救站'],[980,317,'警衛室'],[825,45,'交流門']];
+const PINS=[[350,330,'指揮中心'],[350,415,'防災倉庫'],[480,380,'最終集合地點'],[545,343,'急救站'],[980,317,'警衛室'],[825,45,'交流門'],[397,328,'室外避難處'],[660,190,'健康中心'],[700,315,'AED'],[907,273,'通訊設備放置點'],[905,285,'救援器材放置點'],[950,342,'災時家長接送區']];
 let focus='all',wh=2,extra=0,routesOn=true,cWh=1.1;const FL=[];
 function view(p,t,dur=700){const id=++view.id,p0=cam.position.clone(),t0=ctl.target.clone(),t1=performance.now();
  (function s(){if(id!==view.id)return;const k=Math.min(1,(performance.now()-t1)/dur),e=k*k*(3-2*k);cam.position.lerpVectors(p0,new THREE.Vector3(...p),e);ctl.target.lerpVectors(t0,new THREE.Vector3(...t),e);if(k<1)requestAnimationFrame(s)})()}
