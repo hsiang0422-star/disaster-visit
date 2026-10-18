@@ -37,9 +37,9 @@ button.on{background:var(--acc);border-color:var(--acc);color:#fff}
 @media(max-width:760px){html,body{height:auto;min-height:100%}body{min-height:100vh;overflow:auto}header{align-items:flex-start}header nav{width:100%}#stage{flex:none;height:58vh;min-height:240px}#toolbar-panels.open{grid-template-columns:minmax(0,1fr)}#toolbar-panels .toolbar-card{max-height:35vh}}
 </style></head><body>
 <header><h1>國立臺南特殊教育學校・互動式 3D 防災地圖</h1>
-<nav><button id="b-campus" class="on">校園</button><button id="b-bld">教學大樓 3D</button><button id="b-aer">空拍圖</button><button id="ctl-t" onclick="toggleCtl()">操作選項 ▸</button><button id="info-t" onclick="toggleInfo()">防救災資訊 ▸</button></nav></header>
-<div id="toolbar-panels" aria-label="操作選項與防救災資訊"><div id="ctl-b" class="card toolbar-card hide">
-<details open class="facility-tools"><summary>設施定位</summary><div class="mut">從其他視圖使用定位時，地圖會切換至校園 3D；AED、滅火器與消防栓的位置資料待補。</div><div class="row"><button data-facility="outdoor">室外避難處</button><button data-facility="command">指揮中心</button><button data-facility="firstaid">急救站</button><button data-facility="health">健康中心</button><button data-facility="warehouse">防災倉庫</button><button data-facility="rescue">救援器材</button><button data-facility="comms">通訊設備</button><button data-facility="guard">警衛室</button><button data-facility="pickup">家長接送區</button><button data-facility="assembly">最終集合地點</button><button data-facility="wait2">2F等待救援區</button><button data-facility="wait3">3F等待救援區</button><button disabled title="提供AED位置後即可加入定位">AED（待補位置）</button></div></details>
+<nav><button id="b-campus" class="on">校園</button><button id="b-bld">教學大樓 3D</button><button id="b-aer">空拍圖</button><button id="ctl-t" onclick="toggleCtl()">操作選項 ▸</button><button id="info-t" onclick="toggleInfo()">防救災資訊 ▸</button><button id="facility-t" onclick="toggleFacility()">設施定位 ▸</button></nav></header>
+<div id="toolbar-panels" aria-label="操作選項、防救災資訊與設施定位"><div id="ctl-b" class="card toolbar-card hide">
+
 <div id="c-campus"><h3>校園 3D</h3><div class="mut">按住拖曳＝平移、滾輪或雙指縮放；按「拖曳」按鈕可切換旋轉。點「教學大樓」進入樓層。</div>
 <div class="row"><button id="v-iso">斜視</button><button id="v-top">俯視</button><button class="pan">拖曳：平移</button></div>
 <div class="row"><label class="mut"><input type="checkbox" id="k-wall" checked> 建築量體</label><label class="mut"><input type="checkbox" id="k-pin" checked> 設施標示</label></div></div>
@@ -55,7 +55,7 @@ button.on{background:var(--acc);border-color:var(--acc);color:#fff}
 <table><tr><td><b style="color:var(--acc)">地震</b></td><td>先避難，再疏散</td></tr><tr><td><b style="color:var(--acc)">淹水</b></td><td>垂直避難</td></tr><tr><td><b style="color:var(--acc)">海嘯</b></td><td>往高處避難</td></tr><tr><td><b style="color:var(--acc)">土石流</b></td><td>預防性撤離</td></tr></table>
 <h3 style="margin-top:8px">災害通報單位</h3>
 <table><tr><td>教育部校安中心</td><td>02-33437855／33437856</td></tr><tr><td>臺南市災害應變中心</td><td>06-2989119</td></tr><tr><td>安南區災害應變中心</td><td>06-2555667</td></tr><tr><td>國民及學前教育署</td><td>04-37061342</td></tr><tr><td>和順派出所</td><td>06-3554134</td></tr><tr><td>安和消防分隊</td><td>06-3551525</td></tr><tr><td>安南醫院</td><td>06-3553111</td></tr></table>
-<div class="mut" style="margin-top:4px">資料來源：校園防災地圖（地震災害）</div></div></div><div id="stage">
+<div class="mut" style="margin-top:4px">資料來源：校園防災地圖（地震災害）</div></div><div id="facility-b" class="card toolbar-card hide"><h3>設施定位</h3><div class="mut">從其他視圖使用定位時，地圖會切換至校園 3D；AED、滅火器與消防栓的位置資料待補。</div><div class="row"><button data-facility="outdoor">室外避難處</button><button data-facility="command">指揮中心</button><button data-facility="firstaid">急救站</button><button data-facility="health">健康中心</button><button data-facility="warehouse">防災倉庫</button><button data-facility="rescue">救援器材</button><button data-facility="comms">通訊設備</button><button data-facility="guard">警衛室</button><button data-facility="pickup">家長接送區</button><button data-facility="assembly">最終集合地點</button><button data-facility="wait2">2F等待救援區</button><button data-facility="wait3">3F等待救援區</button><button disabled title="提供AED位置後即可加入定位">AED（待補位置）</button></div></div></div><div id="stage">
 <div id="aer"><img id="aerimg" alt="校園空拍圖"></div>
 <div id="tip"></div>
 
@@ -69,9 +69,10 @@ const D={"floors": [{"k": "f1", "s": 1.0, "tx": 0, "ty": 0, "W": 1602, "H": 952,
 const $=s=>document.querySelector(s);
 const loadImg=s=>new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.src=s});
 function showWait(k){const f=k==='f2'?'2F':'3F';$('#wait-t').textContent='教學大樓 '+f+' 等待救援區';$('#wait-d').textContent='這裡是教學大樓 '+f+' 的等待救援區，無法自行避難者在此等候救援人員協助。';$('#wait-go').textContent='查看 '+f+' 樓層平面與動線';$('#wait-go').onclick=()=>{setMode('bld');document.querySelector('[data-f="'+k+'"]').click()};$('#wait').classList.remove('hide')}
-function updateToolbarPanels(){const p=$('#toolbar-panels');if(p)p.classList.toggle('open',!$('#ctl-b').classList.contains('hide')||!$('#info-b').classList.contains('hide'))}
+function updateToolbarPanels(){const p=$('#toolbar-panels');if(p)p.classList.toggle('open',!$('#ctl-b').classList.contains('hide')||!$('#info-b').classList.contains('hide')||!$('#facility-b').classList.contains('hide'))}
 function toggleCtl(){const b=$('#ctl-b'),o=b.classList.toggle('hide')===false;$('#ctl-t').textContent='操作選項'+(o?' ▾':' ▸');updateToolbarPanels()}
 function toggleInfo(){const b=$('#info-b'),o=b.classList.toggle('hide')===false;$('#info-t').textContent='防救災資訊'+(o?' ▾':' ▸');updateToolbarPanels()}
+function toggleFacility(){const b=$('#facility-b'),o=b.classList.toggle('hide')===false;$('#facility-t').textContent='設施定位'+(o?' ▾':' ▸');updateToolbarPanels()}
 const stage=$('#stage');
 const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
