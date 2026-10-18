@@ -115,7 +115,7 @@ const evacuationPaths=[
  // 教學大樓西側紅色箭頭：沿箭頭向西南匯流，最後抵達校園圖上的最終集合點標記。
  [[1385,465],[1370,490],[1348,520],[1300,560],[1250,630],[1195,735],[1100,750],[1030,755],[960,760]],
  [[1390,545],[1355,550],[1310,585],[1255,650],[1195,735],[1100,750],[1030,755],[960,760]],
- [[1390,585],[1355,590],[1315,620],[1255,680],[1195,735],[1100,750],[1030,755],[960,760]]
+ [[1345,1075],[1318,1078],[1288,1055],[1255,1025],[1222,995],[1190,965],[1158,935],[1122,905],[1080,870],[1038,830],[998,795],[960,760]]
 ];
 function makeWalker(monochrome=false){
  const person=new THREE.Group(),skin=new THREE.MeshBasicMaterial({color:monochrome?0x111111:0xffd9ae}),vest=new THREE.MeshBasicMaterial({color:monochrome?0x111111:0xf08a24}),pants=new THREE.MeshBasicMaterial({color:monochrome?0x111111:0x234c78}),outline=new THREE.MeshBasicMaterial({color:monochrome?0x111111:0xffffff});
@@ -133,15 +133,15 @@ function initWalkers(){
  // 兩隊各 200 人：第二隊從使用者標出的右下方圓形轉角紅線先出發，第一隊再從小一甲出口跟上；兩隊依箭頭匯入同一集合點。
  const routeCurves=[evacuationPaths[0],evacuationPaths[2]].map(points=>new THREE.CatmullRomCurve3(points.map(([x,y])=>{const [wx,wz]=g2w(x/2,y/2);return new THREE.Vector3(wx,0,wz)}),false,'centripetal'));
  const queueCenter=g2w(480,447),forward=new THREE.Vector3(-.86,0,.51).normalize(),side=new THREE.Vector3(-forward.z,0,forward.x);
- const walkersPerRoute=200,walkerCount=walkersPerRoute*2,queueCols=20,queueSpacing=.21,speed=3.2;
+ const walkersPerRoute=200,walkerCount=walkersPerRoute*2,queueCols=20,queueSpacing=.21,speed=1.15;
  for(let i=0;i<walkerCount;i++){
   const pathIndex=Math.floor(i/walkersPerRoute),routeIndex=i%walkersPerRoute,curve=routeCurves[pathIndex],length=curve.getLength();
   const col=i%queueCols,row=Math.floor(i/queueCols),slot=new THREE.Vector3(queueCenter[0],0,queueCenter[1]);
   slot.addScaledVector(side,(col-(queueCols-1)/2)*queueSpacing);
   slot.addScaledVector(forward,-row*queueSpacing);
   const last=curve.getPointAt(1),approach=new THREE.CatmullRomCurve3([last,new THREE.Vector3((last.x+slot.x)/2,0,(last.z+slot.z)/2),slot],false,'centripetal');
-  const w=makeWalker();w.person.scale.setScalar(.72);walkersLayer.add(w.person);
-  walkers.push({...w,curve,length,approach,approachLength:approach.getLength(),slot,depart:pathIndex===1?routeIndex*.06:6+routeIndex*.06,speed,pathIndex,step:i*.71,travelled:false});
+  const w=makeWalker();w.person.scale.setScalar(.9);walkersLayer.add(w.person);
+  walkers.push({...w,curve,length,approach,approachLength:approach.getLength(),slot,depart:pathIndex===1?routeIndex*.18:8.5+routeIndex*.18,speed,pathIndex,step:i*.71,travelled:false});
  }
 }
 const floorEvacuationWalkers=[],routeSvg=document.createElementNS('http://www.w3.org/2000/svg','svg');
