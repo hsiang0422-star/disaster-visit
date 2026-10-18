@@ -116,15 +116,15 @@ const evacuationPaths=[
  [[1390,545],[1355,550],[1310,585],[1255,650],[1195,735],[1100,750],[1030,755],[960,760]],
  [[1390,585],[1355,590],[1315,620],[1255,680],[1195,735],[1100,750],[1030,755],[960,760]]
 ];
-function makeWalker(){
- const person=new THREE.Group(),skin=new THREE.MeshBasicMaterial({color:0xffd9ae}),vest=new THREE.MeshBasicMaterial({color:0xf08a24}),pants=new THREE.MeshBasicMaterial({color:0x234c78}),outline=new THREE.MeshBasicMaterial({color:0xffffff});
+function makeWalker(monochrome=false){
+ const person=new THREE.Group(),skin=new THREE.MeshBasicMaterial({color:monochrome?0x111111:0xffd9ae}),vest=new THREE.MeshBasicMaterial({color:monochrome?0x111111:0xf08a24}),pants=new THREE.MeshBasicMaterial({color:monochrome?0x111111:0x234c78}),outline=new THREE.MeshBasicMaterial({color:monochrome?0x111111:0xffffff});
  const part=(geo,mat)=>{const m=new THREE.Mesh(geo,mat);m.renderOrder=6;person.add(m);return m};
  part(new THREE.SphereGeometry(.095,12,10),outline).position.set(0,.62,0);
  part(new THREE.SphereGeometry(.069,12,10),skin).position.set(0,.62,.015);
  part(new THREE.CylinderGeometry(.125,.16,.29,10),vest).position.set(0,.405,0);
  const arm=(x)=>{const pivot=new THREE.Group();pivot.position.set(x,.51,0);const m=new THREE.Mesh(new THREE.CylinderGeometry(.045,.055,.23,8),vest);m.position.y=-.115;m.renderOrder=6;pivot.add(m);person.add(pivot);return pivot};
  const leg=(x)=>{const pivot=new THREE.Group();pivot.position.set(x,.27,0);const m=new THREE.Mesh(new THREE.CylinderGeometry(.05,.06,.24,8),pants);m.position.y=-.12;m.renderOrder=6;pivot.add(m);person.add(pivot);return pivot};
- const shadow=new THREE.Mesh(new THREE.CircleGeometry(.16,16),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.8,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.015;shadow.renderOrder=5;person.add(shadow);
+ const shadow=new THREE.Mesh(new THREE.CircleGeometry(.16,16),new THREE.MeshBasicMaterial({color:monochrome?0x111111:0xffffff,transparent:true,opacity:.8,depthWrite:false}));shadow.rotation.x=-Math.PI/2;shadow.position.y=.015;shadow.renderOrder=5;person.add(shadow);
  return {person,arms:[arm(-.17),arm(.17)],legs:[leg(-.075),leg(.075)]}
 }
 function initWalkers(){
@@ -147,8 +147,8 @@ function initFloorWalkers(o,floorIndex){
  const paths=o.f.routes.map(d=>{const p=document.createElementNS('http://www.w3.org/2000/svg','path');p.setAttribute('d',d);routeSvg.append(p);const length=p.getTotalLength();return {p,length,worldLength:length*o.f.s*S}}).filter(r=>r.length>0);
  const group=new THREE.Group();group.visible=false;o.g.add(group);o.floorWalkers=group;
  for(let i=0;i<10;i++){
-  const route=paths[Math.min(paths.length-1,Math.floor(i*paths.length/10))],w=makeWalker(),phase=((i*.173+floorIndex*.117)%1);
-  w.person.scale.setScalar(.62);group.add(w.person);
+  const route=paths[Math.min(paths.length-1,Math.floor(i*paths.length/10))],w=makeWalker(true),phase=((i*.173+floorIndex*.117)%1);
+  w.person.scale.setScalar(1.05);group.add(w.person);
   floorEvacuationWalkers.push({person:w.person,arms:w.arms,legs:w.legs,route,f:o.f,phase,step:i*.83});
  }
 }
