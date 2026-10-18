@@ -281,7 +281,7 @@ const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
 function loop(){requestAnimationFrame(loop);const t=reduce?0:performance.now()/1000;ctl.update();
  if(mode==='campus'){rings.forEach((r,i)=>{const k=(t*.6+i*.2)%1;r.scale.setScalar(1+k*(r.userData.pinKey===selectedFacility?9:(r.userData.s||4)));r.material.opacity=.9*(1-k)});
   if(walkersLayer.visible)walkers.forEach(w=>{
-   const elapsed=reduce?1e6:t-walkerClockOrigin-w.depart;
+   const elapsed=t-walkerClockOrigin-w.depart;
    if(elapsed<0){w.person.visible=false;return}w.person.visible=true;
    const routeTime=w.length/w.speed,queueTime=Math.max(.65,w.approachLength/w.speed),moving=elapsed<routeTime+queueTime;
    let p,d;
