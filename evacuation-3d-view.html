@@ -13,7 +13,7 @@ nav{display:flex;flex-wrap:wrap;gap:6px}
 #ctl-t,#info-t{white-space:nowrap}
 #toolbar-panels{display:none;padding:34px 10px 10px}
 #toolbar-panels.open{position:fixed;z-index:20;display:grid;grid-template-columns:minmax(0,1fr);gap:3px;width:min(340px,calc(100vw - 16px));min-width:min(260px,calc(100vw - 16px));max-width:calc(100vw - 16px);max-height:min(68vh,600px);resize:both;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.20)}
-#toolbar-drag-handle{position:absolute;top:0;left:0;right:0;height:30px;display:flex;align-items:center;padding:0 8px 0 12px;border-bottom:1px solid var(--line);border-radius:12px 12px 0 0;background:var(--bg);color:var(--mut);font-size:10px;font-weight:600;cursor:move;touch-action:none;user-select:none;-webkit-user-select:none}#toolbar-close{margin-left:auto;padding:0 7px;border:0;background:transparent;font-size:18px;line-height:1;cursor:pointer}
+#toolbar-drag-handle{position:absolute;top:0;left:0;right:0;height:30px;display:flex;align-items:center;padding:0 8px 0 12px;border-bottom:1px solid var(--line);border-radius:12px 12px 0 0;background:var(--bg);color:var(--mut);font-size:10px;font-weight:600;cursor:move;touch-action:none;user-select:none;-webkit-user-select:none}#toolbar-drag-handle .toolbar-hint{white-space:nowrap;max-width:none;flex:1;min-width:0;line-height:1.2}#toolbar-close{margin-left:auto;padding:0 7px;border:0;background:transparent;font-size:18px;line-height:1;cursor:pointer}
 #toolbar-panels .toolbar-card{position:static;max-width:none;width:100%;box-shadow:none;max-height:none;overflow:visible;padding:5px 7px;font-size:11px;line-height:1.3}
 #toolbar-panels .toolbar-card h3{font-size:11px;margin:0 0 3px}
 #toolbar-panels .row{gap:4px;margin:4px 0}
@@ -44,7 +44,7 @@ button.on{background:var(--acc);border-color:var(--acc);color:#fff}.save-btn{bor
 </style></head><body>
 <header><h1>國立臺南特殊教育學校・互動式 3D 防災地圖</h1>
 <nav><button id="b-campus" class="on">校園</button><button id="b-bld">教學大樓 3D</button><button id="b-aer">空拍圖</button><button id="ctl-t" onclick="toggleCtl()">操作選項 ▸</button><button id="info-t" onclick="toggleInfo()">防救災資訊 ▸</button><button id="facility-t" onclick="toggleFacility()">設施定位 ▸</button><button id="save-pictures" class="save-btn" title="下載全部地圖底圖與目前 3D 畫面">⬇ 下載圖檔</button></nav></header>
-<div id="toolbar-panels" aria-label="操作選項、防救災資訊與設施定位"><div id="toolbar-drag-handle" aria-label="按住拖曳移動選項框">⠿　<span style="max-width:4em;white-space:normal;overflow-wrap:anywhere;word-break:break-all">拖曳移動・調整大小</span><button id="toolbar-close" type="button" aria-label="關閉操作選項" title="關閉">×</button></div><div id="ctl-b" class="card toolbar-card hide">
+<div id="toolbar-panels" aria-label="操作選項、防救災資訊與設施定位"><div id="toolbar-drag-handle" aria-label="按住拖曳移動選項框">⠿　<span class="toolbar-hint">拖曳移動・調整大小</span><button id="toolbar-close" type="button" aria-label="關閉操作選項" title="關閉">×</button></div><div id="ctl-b" class="card toolbar-card hide">
 
 <div id="c-campus"><h3>校園 3D</h3><div class="mut">拖曳方式可分別選擇平移或旋轉；滾輪或雙指縮放。若要查看樓層，請點上方「教學大樓 3D」按鈕。</div>
 <div class="row"><button id="v-iso">斜視</button><button id="v-top">俯視</button><button class="mode-pan">拖曳：平移</button><button class="mode-rotate">拖曳：旋轉</button></div>
