@@ -11,17 +11,12 @@ header{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;padding:8px 1
 h1{font-size:16px;margin:0}
 nav{display:flex;flex-wrap:wrap;gap:6px}
 #ctl-t,#info-t{white-space:nowrap}
-#toolbar-panels{display:none;padding:34px 10px 10px}
-#toolbar-panels.open{position:fixed;z-index:20;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;width:min(640px,calc(100vw - 24px));min-width:min(320px,calc(100vw - 24px));min-height:160px;max-width:calc(100vw - 16px);max-height:calc(100vh - 16px);resize:both;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.24)}
-#toolbar-drag-handle{position:absolute;top:0;left:0;right:0;height:30px;display:flex;align-items:center;padding:0 8px 0 12px;border-bottom:1px solid var(--line);border-radius:12px 12px 0 0;background:var(--bg);color:var(--mut);font-size:12px;font-weight:600;cursor:move;touch-action:none;user-select:none;-webkit-user-select:none}#toolbar-close{margin-left:auto;padding:0 7px;border:0;background:transparent;font-size:18px;line-height:1;cursor:pointer}
-#toolbar-panels .toolbar-card{position:static;max-width:none;width:100%;box-shadow:none;max-height:30vh;overflow:auto;padding:7px 9px;font-size:12px}
-#toolbar-panels .toolbar-card h3{font-size:12px;margin:0 0 3px}
-#toolbar-panels .row{gap:4px;margin:4px 0}
-#toolbar-panels .toolbar-card button{font-size:12px;padding:3px 7px;border-radius:5px}
-#toolbar-panels .mut{font-size:11px}
+#toolbar-panels{display:none;padding:8px 12px 10px}
+#toolbar-panels.open{position:relative;z-index:5;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;background:var(--panel);border-bottom:1px solid var(--line)}
+#toolbar-panels .toolbar-card{position:static;max-width:none;width:100%;box-shadow:none;max-height:30vh;overflow:auto}
 button{font:inherit;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:4px 10px;cursor:pointer}
-button.on{background:var(--acc);border-color:var(--acc);color:#fff}.save-btn{border-color:var(--acc);color:var(--acc);font-weight:600}
-#stage{position:relative;z-index:0;flex:1;min-height:0}.floor-badge{position:absolute;z-index:3;left:12px;top:12px;padding:7px 12px;border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:8px;background:var(--panel);color:var(--fg);font-size:16px;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,.16);pointer-events:none}
+button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+#stage{position:relative;z-index:0;flex:1;min-height:0}
 #stage canvas.gl{position:absolute;inset:0;width:100%;height:100%;display:block}
 .card{position:absolute;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;max-width:min(300px,calc(100% - 24px));box-shadow:0 2px 10px rgba(0,0,0,.12)}
 #info{font-size:12.5px}
@@ -39,15 +34,15 @@ button.on{background:var(--acc);border-color:var(--acc);color:#fff}.save-btn{bor
 #aer{position:absolute;inset:0;overflow:hidden;display:none;background:#000;touch-action:none;cursor:grab}
 #aer img{position:absolute;left:0;top:0;transform-origin:0 0;user-select:none;-webkit-user-drag:none}
 .hide{display:none!important}
-@media(max-width:760px){html,body{height:auto;min-height:100%}body{min-height:100vh;overflow:auto}header{align-items:flex-start}header nav{width:100%}#stage{flex:none;height:58vh;min-height:240px}#toolbar-panels.open{grid-template-columns:minmax(0,1fr);max-height:78vh}#toolbar-panels .toolbar-card{max-height:35vh}}
+@media(max-width:760px){html,body{height:auto;min-height:100%}body{min-height:100vh;overflow:auto}header{align-items:flex-start}header nav{width:100%}#stage{flex:none;height:58vh;min-height:240px}#toolbar-panels.open{grid-template-columns:minmax(0,1fr)}#toolbar-panels .toolbar-card{max-height:35vh}}
 </style></head><body>
 <header><h1>國立臺南特殊教育學校・互動式 3D 防災地圖</h1>
-<nav><button id="b-campus" class="on">校園</button><button id="b-bld">教學大樓 3D</button><button id="b-aer">空拍圖</button><button id="ctl-t" onclick="toggleCtl()">操作選項 ▸</button><button id="info-t" onclick="toggleInfo()">防救災資訊 ▸</button><button id="facility-t" onclick="toggleFacility()">設施定位 ▸</button><button id="save-pictures" class="save-btn" title="下載全部地圖底圖與目前 3D 畫面">⬇ 下載圖檔</button></nav></header>
-<div id="toolbar-panels" aria-label="操作選項、防救災資訊與設施定位"><div id="toolbar-drag-handle" aria-label="按住拖曳移動選項框">⠿　拖曳移動・右下角縮放<button id="toolbar-close" type="button" aria-label="關閉操作選項" title="關閉">×</button></div><div id="ctl-b" class="card toolbar-card hide">
+<nav><button id="b-campus" class="on">校園</button><button id="b-bld">教學大樓 3D</button><button id="b-aer">空拍圖</button><button id="ctl-t" onclick="toggleCtl()">操作選項 ▸</button><button id="info-t" onclick="toggleInfo()">防救災資訊 ▸</button><button id="facility-t" onclick="toggleFacility()">設施定位 ▸</button></nav></header>
+<div id="toolbar-panels" aria-label="操作選項、防救災資訊與設施定位"><div id="ctl-b" class="card toolbar-card hide">
 
-<div id="c-campus"><h3>校園 3D</h3><div class="mut">按住拖曳＝平移、滾輪或雙指縮放；按「拖曳」按鈕可切換旋轉。若要查看樓層，請點上方「教學大樓 3D」按鈕。</div>
+<div id="c-campus"><h3>校園 3D</h3><div class="mut">按住拖曳＝平移、滾輪或雙指縮放；按「拖曳」按鈕可切換旋轉。點「教學大樓」進入樓層。</div>
 <div class="row"><button id="v-iso">斜視</button><button id="v-top">俯視</button><button class="pan">拖曳：平移</button></div>
-<div class="row"><label class="mut"><input type="checkbox" id="k-wall" checked> 建築量體</label><label class="mut"><input type="checkbox" id="k-pin" checked> 設施標示</label><label class="mut"><input type="checkbox" id="k-roof" checked> 教學大樓屋頂</label><label class="mut"><input type="checkbox" id="k-walk" checked> 疏散人流</label></div></div>
+<div class="row"><label class="mut"><input type="checkbox" id="k-wall" checked> 建築量體</label><label class="mut"><input type="checkbox" id="k-pin" checked> 設施標示</label><label class="mut"><input type="checkbox" id="k-walk" checked> 疏散人流（100人）</label></div></div>
 <div id="c-bld" class="hide"><h3>教學大樓 1F–3F</h3>
 <div class="row"><button data-f="all" class="on">整棟</button><button data-f="f3">3F</button><button data-f="f2">2F</button><button data-f="f1">1F</button></div>
 <div class="row mut">牆高 <input type="range" id="wh" min="1" max="4" step="0.1" value="2"></div>
@@ -62,7 +57,7 @@ button.on{background:var(--acc);border-color:var(--acc);color:#fff}.save-btn{bor
 <table><tr><td>教育部校安中心</td><td>02-33437855／33437856</td></tr><tr><td>臺南市災害應變中心</td><td>06-2989119</td></tr><tr><td>安南區災害應變中心</td><td>06-2555667</td></tr><tr><td>國民及學前教育署</td><td>04-37061342</td></tr><tr><td>和順派出所</td><td>06-3554134</td></tr><tr><td>安和消防分隊</td><td>06-3551525</td></tr><tr><td>安南醫院</td><td>06-3553111</td></tr></table>
 <div class="mut" style="margin-top:4px">資料來源：校園防災地圖（地震災害）</div></div><div id="facility-b" class="card toolbar-card hide"><h3>設施定位</h3><div class="row"><button data-facility="outdoor">室外避難處</button><button data-facility="command">指揮中心</button><button data-facility="firstaid">急救站</button><button data-facility="health">健康中心</button><button data-facility="warehouse">防災倉庫</button><button data-facility="rescue">救援器材</button><button data-facility="comms">通訊設備</button><button data-facility="guard">警衛室</button><button data-facility="pickup">家長接送區</button><button data-facility="assembly">最終集合地點</button><button data-facility="wait2">2F等待救援區</button><button data-facility="wait3">3F等待救援區</button><button disabled title="提供AED位置後即可加入定位">AED（待補位置）</button></div></div></div><div id="stage">
 <div id="aer"><img id="aerimg" alt="校園空拍圖"></div>
-<div id="tip"></div><div id="floor-badge" class="floor-badge hide" aria-live="polite">教學大樓｜整棟樓層圖</div>
+<div id="tip"></div>
 
 <div id="wait" class="card hide"><button class="x" onclick="document.querySelector('#wait').classList.add('hide')" aria-label="關閉">×</button><h3 id="wait-t"></h3><div id="wait-d" class="mut"></div><div class="row"><button id="wait-go"></button></div></div>
 
@@ -74,17 +69,12 @@ const D={"floors": [{"k": "f1", "s": 1.0, "tx": 0, "ty": 0, "W": 1602, "H": 952,
 const $=s=>document.querySelector(s);
 const loadImg=s=>new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.src=s});
 function showWait(k){const f=k==='f2'?'2F':'3F';$('#wait-t').textContent='教學大樓 '+f+' 等待救援區';$('#wait-d').textContent='這裡是教學大樓 '+f+' 的等待救援區，無法自行避難者在此等候救援人員協助。';$('#wait-go').textContent='查看 '+f+' 樓層平面與動線';$('#wait-go').onclick=()=>{setMode('bld');document.querySelector('[data-f="'+k+'"]').click()};$('#wait').classList.remove('hide')}
-let toolbarPanelPositioned=false;function updateToolbarPanels(){const p=$('#toolbar-panels');if(!p)return;const open=!$('#ctl-b').classList.contains('hide')||!$('#info-b').classList.contains('hide')||!$('#facility-b').classList.contains('hide');p.classList.toggle('open',open);if(open&&!toolbarPanelPositioned)requestAnimationFrame(()=>{const h=document.querySelector('header').getBoundingClientRect(),r=p.getBoundingClientRect();p.style.left=Math.max(8,Math.min(12,innerWidth-r.width-8))+'px';p.style.top=Math.max(8,Math.min(h.bottom+8,innerHeight-r.height-8))+'px';toolbarPanelPositioned=true})}
+function updateToolbarPanels(){const p=$('#toolbar-panels');if(p)p.classList.toggle('open',!$('#ctl-b').classList.contains('hide')||!$('#info-b').classList.contains('hide')||!$('#facility-b').classList.contains('hide'))}
 function toggleCtl(){const b=$('#ctl-b'),o=b.classList.toggle('hide')===false;$('#ctl-t').textContent='操作選項'+(o?' ▾':' ▸');updateToolbarPanels()}
-function closeToolbarPanels(){['#ctl-b','#info-b','#facility-b'].forEach(s=>$(s).classList.add('hide'));$('#ctl-t').textContent='操作選項 ▸';$('#info-t').textContent='防救災資訊 ▸';$('#facility-t').textContent='設施定位 ▸';updateToolbarPanels()}
-$('#toolbar-close').addEventListener('pointerdown',e=>e.stopPropagation());$('#toolbar-close').addEventListener('click',closeToolbarPanels);
-// 預設顯示可拖曳的操作選項面板
-$('#ctl-b').classList.remove('hide');$('#ctl-t').textContent='操作選項 ▾';updateToolbarPanels();
 function toggleInfo(){const b=$('#info-b'),o=b.classList.toggle('hide')===false;$('#info-t').textContent='防救災資訊'+(o?' ▾':' ▸');updateToolbarPanels()}
 function toggleFacility(){const b=$('#facility-b'),o=b.classList.toggle('hide')===false;$('#facility-t').textContent='設施定位'+(o?' ▾':' ▸');updateToolbarPanels()}
-const toolbarPanel=$('#toolbar-panels'),toolbarDrag=$('#toolbar-drag-handle');let toolbarDragState=null;toolbarDrag.addEventListener('pointerdown',e=>{if(e.button!==undefined&&e.button!==0)return;const r=toolbarPanel.getBoundingClientRect();toolbarDragState={id:e.pointerId,x:e.clientX,y:e.clientY,left:r.left,top:r.top};toolbarDrag.setPointerCapture(e.pointerId);e.preventDefault()});toolbarDrag.addEventListener('pointermove',e=>{if(!toolbarDragState||toolbarDragState.id!==e.pointerId)return;const left=toolbarDragState.left+e.clientX-toolbarDragState.x,top=toolbarDragState.top+e.clientY-toolbarDragState.y;toolbarPanel.style.left=Math.max(8,Math.min(innerWidth-toolbarPanel.offsetWidth-8,left))+'px';toolbarPanel.style.top=Math.max(8,Math.min(innerHeight-toolbarPanel.offsetHeight-8,top))+'px'});const stopToolbarDrag=e=>{if(toolbarDragState&&toolbarDragState.id===e.pointerId)toolbarDragState=null};toolbarDrag.addEventListener('pointerup',stopToolbarDrag);toolbarDrag.addEventListener('pointercancel',stopToolbarDrag);function clampToolbarPanel(){if(!toolbarPanel.classList.contains('open'))return;const r=toolbarPanel.getBoundingClientRect();toolbarPanel.style.left=Math.max(8,Math.min(innerWidth-r.width-8,r.left))+'px';toolbarPanel.style.top=Math.max(8,Math.min(innerHeight-r.height-8,r.top))+'px'}new ResizeObserver(()=>requestAnimationFrame(clampToolbarPanel)).observe(toolbarPanel);window.addEventListener('resize',clampToolbarPanel);
 const stage=$('#stage');
-const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
 renderer.domElement.className='gl';stage.insertBefore(renderer.domElement,stage.firstChild);
 const scene=new THREE.Scene();
@@ -103,14 +93,19 @@ function label(txt,sz=1.6,col='#1d2733',bg='rgba(255,255,255,.88)'){
  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthTest:false}));
  s.scale.set(sz*4,sz,1);s.renderOrder=10;return s}
 function leader(x,z,fromY,toY){const h=Math.max(.05,toY-fromY),make=(r,c)=>new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,10),new THREE.MeshBasicMaterial({color:c,depthTest:false}));const edge=make(.13,0x173b32),core=make(.065,0xffd43b);[edge,core].forEach(m=>{m.position.set(x,fromY+h/2,z);m.renderOrder=9;pins.add(m)});const dot=new THREE.Mesh(new THREE.SphereGeometry(.2,12,8),new THREE.MeshBasicMaterial({color:0x173b32,depthTest:false})),center=new THREE.Mesh(new THREE.SphereGeometry(.11,12,8),new THREE.MeshBasicMaterial({color:0xffd43b,depthTest:false}));[dot,center].forEach(m=>{m.position.set(x,fromY,z);m.renderOrder=9;pins.add(m)})}
-let mode='campus',campus=new THREE.Group(),bld=new THREE.Group(),walls=new THREE.Group(),pins=new THREE.Group(),walkersLayer=new THREE.Group(),hits=[],rings=[],waits=[],bhits=[],roof=null,walkers=[];
+let mode='campus',campus=new THREE.Group(),bld=new THREE.Group(),walls=new THREE.Group(),pins=new THREE.Group(),walkersLayer=new THREE.Group(),hits=[],rings=[],waits=[],bhits=[],walkers=[];
 scene.add(campus,bld);campus.add(walls,pins,walkersLayer);
 const CW=64,CH=CW*1382/2140,g2w=(gx,gy)=>[(gx*2/2140-.5)*CW,(gy*2/1382-.5)*CH];
 const S=40/1387,W1=1602,H1=952,KG=.36,GS=KG*(2*CW/2140)/S;
 const fx=(f,px)=>(f.s*px+f.tx-W1/2)*S,fz=(f,py)=>(f.s*py+f.ty-H1/2)*S;
 const BLD=[[70,100,140,155,3,'校舍'],[245,95,115,110,3,'校舍'],[370,95,115,110,3,'校舍'],[500,100,290,115,3,'教學大樓（示意位置）','tb'],[695,215,135,105,3,'教學大樓（示意位置）','tb'],[685,320,145,280,3,'教學大樓（示意位置）','tb'],[840,160,100,140,2,'禮堂']];
 const PINS=[[350,330,'指揮中心','command'],[350,415,'防災倉庫','warehouse'],[480,380,'最終集合地點','assembly'],[545,343,'急救站','firstaid'],[980,317,'警衛室','guard'],[825,45,'交流門','gate'],[397,328,'室外避難處','outdoor'],[660,190,'健康中心','health'],[907,273,'通訊設備放置點','comms'],[905,285,'救援器材放置點','rescue'],[950,342,'災時家長接送區','pickup']];
-const evacuationPaths=[[[244,298],[244,486],[416,486],[570,580],[720,646],[862,700]],[[625,421],[625,535],[674,590],[766,648],[862,700]],[[980,168],[980,410],[980,532],[934,610],[862,700]],[[1283,529],[1196,594],[1108,649],[1001,681],[862,700]]];
+const evacuationPaths=[
+ // 教學大樓西側紅色箭頭：各出口向西匯流，再沿草地通道前往最終集合地點。
+ [[1385,465],[1370,490],[1348,520],[1300,560],[1250,630],[1195,735],[1090,748],[980,730],[870,700]],
+ [[1390,545],[1355,550],[1310,585],[1255,650],[1195,735],[1090,748],[980,730],[870,700]],
+ [[1390,585],[1355,590],[1315,620],[1255,680],[1195,735],[1090,748],[980,730],[870,700]]
+];
 function makeWalker(){
  const person=new THREE.Group(),skin=new THREE.MeshBasicMaterial({color:0xffd9ae}),vest=new THREE.MeshBasicMaterial({color:0xf08a24}),pants=new THREE.MeshBasicMaterial({color:0x234c78}),outline=new THREE.MeshBasicMaterial({color:0xffffff});
  const part=(geo,mat)=>{const m=new THREE.Mesh(geo,mat);m.renderOrder=6;person.add(m);return m};
@@ -123,11 +118,20 @@ function makeWalker(){
  return {person,arms:[arm(-.17),arm(.17)],legs:[leg(-.075),leg(.075)]}
 }
 function initWalkers(){
- evacuationPaths.forEach((points,pathIndex)=>{const curve=new THREE.CatmullRomCurve3(points.map(([x,y])=>{const [wx,wz]=g2w(x,y);return new THREE.Vector3(wx,0,wz)}),false,'centripetal'),length=curve.getLength();
-  [0,.5].forEach((phase,i)=>{const w=makeWalker();w.person.scale.setScalar(.72);walkersLayer.add(w.person);walkers.push({...w,curve,length,phase,pathIndex,step:i*Math.PI})})
- })
+ const routeCurves=evacuationPaths.map(points=>new THREE.CatmullRomCurve3(points.map(([x,y])=>{const [wx,wz]=g2w(x,y);return new THREE.Vector3(wx,0,wz)}),false,'centripetal'));
+ const queueCenter=g2w(870,700),forward=new THREE.Vector3(-.86,0,.51).normalize(),side=new THREE.Vector3(-forward.z,0,forward.x);
+ const queueCols=10,queueSpacing=.25,speed=3.2;
+ for(let i=0;i<100;i++){
+  const pathIndex=i%routeCurves.length,routeIndex=Math.floor(i/routeCurves.length),curve=routeCurves[pathIndex],length=curve.getLength();
+  const col=i%queueCols,row=Math.floor(i/queueCols),slot=new THREE.Vector3(queueCenter[0],0,queueCenter[1]);
+  slot.addScaledVector(side,(col-(queueCols-1)/2)*queueSpacing);
+  slot.addScaledVector(forward,-row*queueSpacing);
+  const last=curve.getPointAt(1),approach=new THREE.CatmullRomCurve3([last,new THREE.Vector3((last.x+slot.x)/2,0,(last.z+slot.z)/2),slot],false,'centripetal');
+  const w=makeWalker();w.person.scale.setScalar(.72);walkersLayer.add(w.person);
+  walkers.push({...w,curve,length,approach,approachLength:approach.getLength(),slot,depart:routeIndex*.42+pathIndex*.06,speed,pathIndex,step:i*.71,travelled:false});
+ }
 }
-let selectedFacility='',focus='all',wh=2,extra=0,routesOn=true,cWh=1.1;const FL=[],campusTeachingVolumes=[];
+let selectedFacility='',focus='all',wh=2,extra=0,routesOn=true,cWh=1.1;const FL=[];
 function view(p,t,dur=700){const id=++view.id,p0=cam.position.clone(),t0=ctl.target.clone(),t1=performance.now();
  (function s(){if(id!==view.id)return;const k=Math.min(1,(performance.now()-t1)/dur),e=k*k*(3-2*k);cam.position.lerpVectors(p0,new THREE.Vector3(...p),e);ctl.target.lerpVectors(t0,new THREE.Vector3(...t),e);if(k<1)requestAnimationFrame(s)})()}
 view.id=0;
@@ -137,15 +141,14 @@ const unit=ty=>{const g=new THREE.BoxGeometry(1,1,1);g.translate(0,ty,0);return 
 async function init(){
  const [cm,ae,...pl]=await Promise.all([D.img.campus,D.img.aerial,...D.floors.map(f=>f.plan)].map(loadImg));
  $('#aerimg').src=D.img.aerial;
- const gt=new THREE.Mesh(new THREE.PlaneGeometry(CW,CH),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cm)}));gt.rotation.x=-Math.PI/2;campus.add(gt);
+ const gt=new THREE.Mesh(new THREE.PlaneGeometry(CW,CH),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cm)}));gt.rotation.x=-Math.PI/2;campus.add(gt);initWalkers();
  const slab0=new THREE.Mesh(new THREE.BoxGeometry(CW,.4,CH),new THREE.MeshStandardMaterial({color:0x8a949e}));slab0.position.y=-.21;campus.add(slab0);
- initWalkers();
  BLD.forEach(b=>{const[x,y,w,h,fl,nm,tag]=b;const[x0,z0]=g2w(x,y),[x1,z1]=g2w(x+w,y+h);
   const ht=fl*.9,m=new THREE.Mesh(new THREE.BoxGeometry(x1-x0,ht,z1-z0),new THREE.MeshStandardMaterial({color:tag?0xd62820:0x4a78b5,transparent:true,opacity:tag?.62:.5}));
-  m.position.set((x0+x1)/2,ht/2,(z0+z1)/2);m.userData={nm,tag};
+  m.position.set((x0+x1)/2,ht/2,(z0+z1)/2);m.userData={nm:tag?nm+'（點擊查看樓層）':nm,tag};
   m.add(new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry),new THREE.LineBasicMaterial({color:0x1d2733})));
-  walls.add(m);hits.push(m);if(tag)campusTeachingVolumes.push(m);if(tag){const target=new THREE.Mesh(new THREE.PlaneGeometry(x1-x0,z1-z0),new THREE.MeshBasicMaterial({transparent:true,opacity:0,colorWrite:false,depthWrite:false,side:THREE.DoubleSide}));target.rotation.x=-Math.PI/2;target.position.set((x0+x1)/2,.035,(z0+z1)/2);target.userData={nm:'教學大樓'};walls.add(target);hits.push(target)}
-  if(nm==='禮堂'){const l=label('禮堂',1.3);l.position.set(m.position.x,ht+1.2,m.position.z);walls.add(l)}else if(tag&&x===500){const l=label('教學大樓',1.5,'#fff','#d62820');l.position.set(m.position.x,ht+1.4,m.position.z);l.userData={nm:'教學大樓'};walls.add(l);hits.push(l)}});
+  walls.add(m);hits.push(m);
+  if(nm==='禮堂'){const l=label('禮堂',1.3);l.position.set(m.position.x,ht+1.2,m.position.z);walls.add(l)}else if(tag&&x===500){const l=label('教學大樓',1.5,'#fff','#d62820');l.position.set(m.position.x,ht+1.4,m.position.z);walls.add(l)}});
  // building floors
  D.floors.forEach((f,i)=>{
   const g=new THREE.Group(),im=pl[i];
@@ -162,13 +165,9 @@ async function init(){
   const rp=new THREE.Mesh(new THREE.PlaneGeometry(pw,ph),rm);rp.rotation.x=-Math.PI/2;rp.position.set(cx,.04,cz);rp.renderOrder=2;
   const labs=new THREE.Group();
   f.labs.forEach(([n,x,y])=>{const l=label(n,1.25);l.position.set(fx(f,x),0,fz(f,y));labs.add(l)});
-  if(f.k==='f3'){const rescue=label('等待救援點',1.2,'#286744','rgba(238,247,238,.98)');rescue.position.set(fx(f,1768),0,fz(f,792));labs.add(rescue)}
-  const floorTag=new THREE.Group(),ft=label(['1F','2F','3F'][i],2,'#fff','#1d2733');ft.position.set(fx(f,60),0,fz(f,H1*.62));floorTag.add(ft);
-  g.add(slab,plane,wall,rp,labs,floorTag);bld.add(g);
-  FL.push({f,g,wall,slab,wm,sm,pm,rm,rt,c,ctx:c.getContext('2d'),labs,floorTag,plane,paths:f.routes.map(d=>new Path2D(d)),op:1,k:f.k})});
- // 校園 3D 模式的教學大樓屋頂，依 3F 平面輪廓建立
- const rf=D.floors[2],roofMat=new THREE.MeshStandardMaterial({color:0x65788a,roughness:.72,metalness:.04,transparent:true,opacity:.96,side:THREE.DoubleSide});
- roof=new THREE.InstancedMesh(unit(-.5),roofMat,rf.fp.length);inst(roof,rf.fp,3,rf,.16);roof.userData={nm:'教學大樓屋頂',tag:1};roof.renderOrder=4;bld.add(roof);
+  const ft=label(['1F','2F','3F'][i],2,'#fff','#1d2733');ft.position.set(fx(f,60),0,fz(f,H1*.62));labs.add(ft);
+  g.add(slab,plane,wall,rp,labs);bld.add(g);
+  FL.push({f,g,wall,slab,wm,sm,pm,rm,rt,c,ctx:c.getContext('2d'),labs,plane,paths:f.routes.map(d=>new Path2D(d)),op:1,k:f.k})});
  // waiting-rescue markers (map positions)
  [['f2',770,169,'2F 等待救援區'],['f3',770,128,'3F 等待救援區']].forEach(([k,gx,gy,nm])=>{const[wx,wz]=g2w(gx,gy),ry=3.1;
   const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');x.fillStyle='#2e9e4f';x.fillRect(0,0,128,128);x.strokeStyle='#fff';x.lineWidth=8;x.strokeRect(6,6,116,116);x.fillStyle='#fff';x.font='bold 64px sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText(nm.slice(0,2),64,68);
@@ -184,36 +183,33 @@ async function init(){
 }
 function pose(){if(mode==='campus'){const[px,pz]=g2w(500+(H1/2-45)*KG,100+(1500-W1/2)*KG);bld.rotation.y=Math.PI/2;bld.scale.setScalar(GS);bld.position.set(px,0,pz)}
  else{bld.rotation.y=0;bld.scale.setScalar(1);bld.position.set(0,0,0)}}
-function layout(){const h=mode==='campus'?cWh:wh,e=mode==='campus'?0:extra,isolated=mode==='bld'&&focus!=='all',center=isolated?FL.findIndex(o=>o.k===focus):-1,step=h+(isolated?2.2:.2)+e;
- FL.forEach((o,i)=>{let level=i;if(mode==='bld'&&center>=0&&focus!=='all'){const relative=(i-center+FL.length)%FL.length;level=relative===0?0:relative===1?1:-1}o.g.position.y=level*step+.2;o.g.visible=mode!=='bld'||focus==='all'||focus===o.k;o.wall.scale.y=h;
-  const on=mode==='campus'||focus==='all'||focus===o.k;o.op=on?1:.06;
+function layout(){const h=mode==='campus'?cWh:wh,e=mode==='campus'?0:extra;
+ FL.forEach((o,i)=>{o.g.position.y=i*(h+.2+e)+.2;o.wall.scale.y=h;
+  const on=mode==='campus'||focus==='all'||focus===o.k;o.op=on?1:.08;
   [o.wm,o.sm,o.pm,o.rm].forEach(m=>{m.opacity=o.op});o.wm.depthWrite=o.sm.depthWrite=o.op>.5;
-  o.labs.visible=mode==='bld'&&on&&$('#k-lab').checked;o.labs.children.forEach(l=>l.position.y=h+.9);o.floorTag.visible=mode==='bld'||mode==='campus';o.floorTag.children.forEach(l=>l.position.y=h+.9)});if(roof){roof.position.y=(FL[2]?.g.position.y||0)+h;roof.visible=mode==='campus'&&$('#k-roof').checked&&walls.visible}}
+  o.labs.visible=mode==='bld'&&on&&$('#k-lab').checked;o.labs.children.forEach(l=>l.position.y=h+.9)})}
 function drawRoutes(o,t){const c=o.ctx,f=o.f;c.setLineDash([]);c.clearRect(0,0,f.W,f.H);
  if(routesOn&&o.op>.5){c.lineCap='round';c.lineJoin='round';
   o.paths.forEach(p=>{c.setLineDash([]);c.strokeStyle='rgba(214,40,32,.22)';c.lineWidth=11;c.stroke(p);c.strokeStyle='#d62820';c.lineWidth=5.5;c.setLineDash([16,11]);c.lineDashOffset=-t*26;c.stroke(p)});
   if(f.blink){const a=.2+.8*(.5+.5*Math.sin(t*6));c.globalAlpha=a;c.setLineDash([10,6]);c.strokeStyle='#c2281f';c.lineWidth=5;c.strokeRect(...f.blink);c.globalAlpha=1;c.setLineDash([])}}
  o.rt.needsUpdate=true}
-function updateFloorBadge(){const labels={all:'整棟',f1:'1F',f2:'2F',f3:'3F'};$('#floor-badge').textContent='教學大樓｜'+(labels[focus]||'整棟')+' 樓層圖'}
-function setMode(m){mode=m;$('#wait').classList.add('hide');$('#floor-badge').classList.toggle('hide',m!=='bld');if(m==='bld')updateFloorBadge();
- campus.visible=m==='campus';bld.visible=m==='bld'||(m==='campus'&&walls.visible);campusTeachingVolumes.forEach(o=>o.visible=m!=='campus');
+function setMode(m){mode=m;$('#wait').classList.add('hide');
+ campus.visible=m==='campus';bld.visible=m==='bld';
  renderer.domElement.style.display=m==='aer'?'none':'block';$('#aer').style.display=m==='aer'?'block':'none';
  $('#c-campus').classList.toggle('hide',m!=='campus');$('#c-bld').classList.toggle('hide',m!=='bld');$('#c-aer').classList.toggle('hide',m!=='aer');
  ['campus','bld','aer'].forEach(k=>$('#b-'+k).classList.toggle('on',k===m));
  if(m!=='aer'){pose();layout()}
- if(m==='campus')view([0,86,.1],[0,0,0]);
- if(m==='bld')view([0,52,.1],[0,2.5,0]);
+ if(m==='campus')view([34,38,52],[0,0,2]);
+ if(m==='bld')view([20,26,36],[0,2.5,0]);
  if(m==='aer')resetAer()}
 $('#b-campus').onclick=()=>setMode('campus');$('#b-bld').onclick=()=>setMode('bld');$('#b-aer').onclick=()=>setMode('aer');
 $('#v-iso').onclick=()=>view([34,38,52],[0,0,2]);$('#v-top').onclick=()=>view([0,86,.1],[0,0,0]);
-$('#k-wall').onchange=e=>{walls.visible=e.target.checked;if(mode==='campus')bld.visible=e.target.checked;layout()};$('#k-pin').onchange=e=>pins.visible=e.target.checked;$('#k-roof').onchange=()=>layout();$('#k-walk').onchange=e=>walkersLayer.visible=e.target.checked;
+$('#k-wall').onchange=e=>walls.visible=e.target.checked;$('#k-pin').onchange=e=>pins.visible=e.target.checked;$('#k-walk').onchange=e=>walkersLayer.visible=e.target.checked;
 function focusFacility(key){const p=PINS.find(x=>x[3]===key),xy=p?[p[0],p[1]]:key==='wait2'?[770,169]:key==='wait3'?[770,128]:null;if(!xy)return;if(mode!=='campus')setMode('campus');selectedFacility=key;const[wx,wz]=g2w(...xy),offset=cam.position.clone().sub(ctl.target);offset.setLength(Math.min(44,Math.max(26,offset.length()*.62)));view([wx+offset.x,Math.max(10,offset.y),wz+offset.z],[wx,0,wz],750)}
 document.querySelectorAll('[data-facility]').forEach(b=>b.onclick=()=>focusFacility(b.dataset.facility));
 $('#v2-iso').onclick=()=>view([20,26,36],[0,2.5,0]);$('#v2-top').onclick=()=>view([0,52,.1],[0,0,0]);$('#v2-side').onclick=()=>view([0,wh*1.5+extra,48],[0,wh*1.5+extra,0]);
-document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{focus=b.dataset.f;updateFloorBadge();document.querySelectorAll('[data-f]').forEach(x=>x.classList.toggle('on',x===b));layout();
- const aspect=stage.clientWidth/Math.max(1,stage.clientHeight),tan=Math.tan(THREE.MathUtils.degToRad(cam.fov/2));
- if(focus!=='all'){const f=FL.find(o=>o.k===focus).f,d=Math.max(f.W*f.s*S/(2*tan*aspect),f.H*f.s*S/(2*tan))*1.12,cx=fx(f,f.W/2),cz=fz(f,f.H/2),cy=.2+wh*.45;view([cx,cy+d,cz+.01],[cx,cy,cz])}
- else{const mid=(FL.length-1)*(wh+.2+extra)/2+.2,f=FL[0].f,w=Math.max(...FL.map(o=>o.f.W*o.f.s*S)),h=Math.max(...FL.map(o=>o.f.H*o.f.s*S)),d=Math.max(w/(2*tan*aspect),h/(2*tan))*1.12;view([0,mid+d,0.01],[0,mid,0])}});
+document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{focus=b.dataset.f;document.querySelectorAll('[data-f]').forEach(x=>x.classList.toggle('on',x===b));layout();
+ if(focus!=='all'){const i=FL.findIndex(o=>o.k===focus),y=i*(wh+.2+extra);view([8,y+22,20],[0,y,0])}});
 $('#wh').oninput=e=>{wh=+e.target.value;layout()};$('#gap').oninput=e=>{extra=+e.target.value;layout()};
 $('#k-route').onchange=e=>routesOn=e.target.checked;
 $('#k-tex').onchange=e=>FL.forEach(o=>o.plane.visible=e.target.checked);
@@ -222,9 +218,9 @@ const ray=new THREE.Raycaster(),mp=new THREE.Vector2(),tip=$('#tip');let down=nu
 function pick(ev){const r=renderer.domElement.getBoundingClientRect();mp.set((ev.clientX-r.left)/r.width*2-1,-((ev.clientY-r.top)/r.height)*2+1);ray.setFromCamera(mp,cam);
  const list=(walls.visible?hits:[]).concat(pins.visible?waits:[]);return ray.intersectObjects(list,false)[0]}
 renderer.domElement.addEventListener('pointermove',ev=>{if(mode!=='campus'){tip.style.display='none';return}
- const h=pick(ev);if(h){const u=h.object.userData;tip.textContent=u.wait?u.nm+'（點擊查看說明）':u.nm;tip.style.display='block';tip.style.left=ev.offsetX+12+'px';tip.style.top=ev.offsetY+12+'px';renderer.domElement.style.cursor=u.wait?'pointer':'grab'}else{tip.style.display='none';renderer.domElement.style.cursor='grab'}});
+ const h=pick(ev);if(h){const u=h.object.userData;tip.textContent=u.wait?u.nm+'（點擊查看說明）':u.nm;tip.style.display='block';tip.style.left=ev.offsetX+12+'px';tip.style.top=ev.offsetY+12+'px';renderer.domElement.style.cursor='pointer'}else{tip.style.display='none';renderer.domElement.style.cursor='grab'}});
 renderer.domElement.addEventListener('pointerdown',e=>down=[e.clientX,e.clientY]);
-renderer.domElement.addEventListener('pointerup',ev=>{if(mode!=='campus'||!down||Math.hypot(ev.clientX-down[0],ev.clientY-down[1])>5)return;const h=pick(ev);if(!h)return;const u=h.object.userData;if(u.wait)showWait(u.wait)});
+renderer.domElement.addEventListener('pointerup',ev=>{if(mode!=='campus'||!down||Math.hypot(ev.clientX-down[0],ev.clientY-down[1])>5)return;const h=pick(ev);if(!h)return;const u=h.object.userData;if(u.wait)showWait(u.wait);else if(u.tag)setMode('bld')});
 let az={s:1,x:0,y:0};const ai=$('#aerimg'),av=$('#aer');
 function applyAer(){ai.style.transform=`translate(${az.x}px,${az.y}px) scale(${az.s})`}
 function resetAer(){const w=av.clientWidth,h=av.clientHeight,iw=ai.naturalWidth||876,ih=ai.naturalHeight||1144;az.s=Math.min(w/iw,h/ih);az.x=(w-iw*az.s)/2;az.y=(h-ih*az.s)/2;applyAer()}
@@ -243,24 +239,18 @@ new ResizeObserver(resize).observe(stage);
 const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
 function loop(){requestAnimationFrame(loop);const t=reduce?0:performance.now()/1000;ctl.update();
  if(mode==='campus'){rings.forEach((r,i)=>{const k=(t*.6+i*.2)%1;r.scale.setScalar(1+k*(r.userData.pinKey===selectedFacility?9:(r.userData.s||4)));r.material.opacity=.9*(1-k)});
-  if(walkersLayer.visible)walkers.forEach(w=>{const u=reduce?w.phase:(t*1.15/w.length+w.phase)%1,p=w.curve.getPointAt(u),d=w.curve.getTangentAt(u),s=reduce?0:Math.sin(t*8+w.step);w.person.position.set(p.x,.045+(reduce?0:Math.abs(s)*.018),p.z);w.person.rotation.y=Math.atan2(d.x,d.z);w.arms[0].rotation.x=s*.62;w.arms[1].rotation.x=-s*.62;w.legs[0].rotation.x=-s*.72;w.legs[1].rotation.x=s*.72})}
+  if(walkersLayer.visible)walkers.forEach(w=>{
+   const elapsed=reduce?1e6:t-w.depart;
+   if(elapsed<0){w.person.visible=false;return}w.person.visible=true;
+   const routeTime=w.length/w.speed,queueTime=Math.max(.65,w.approachLength/w.speed),moving=elapsed<routeTime+queueTime;
+   let p,d;
+   if(elapsed<routeTime){const u=Math.max(0,elapsed/routeTime);p=w.curve.getPointAt(u);d=w.curve.getTangentAt(u)}
+   else if(moving){const u=Math.min(1,(elapsed-routeTime)/queueTime);p=w.approach.getPointAt(u);d=w.approach.getTangentAt(u)}
+   else {p=w.slot;d=w.approach.getTangentAt(1)}
+   const s=(!reduce&&moving)?Math.sin(t*8+w.step):0;
+   w.person.position.set(p.x,.045+(s?Math.abs(s)*.018:0),p.z);w.person.rotation.y=Math.atan2(d.x,d.z);
+   w.arms[0].rotation.x=s*.62;w.arms[1].rotation.x=-s*.62;w.legs[0].rotation.x=-s*.72;w.legs[1].rotation.x=s*.72;
+  })}
  if(mode!=='aer'){FL.forEach(o=>drawRoutes(o,t));renderer.render(scene,cam)}}
-function imageBytes(src){const raw=atob(src.slice(src.indexOf(',')+1)),out=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)out[i]=raw.charCodeAt(i);return out}
-function imageZip(entries){
- const enc=new TextEncoder(),locals=[],centrals=[];let offset=0,centralSize=0;
- const now=new Date(),tm=(now.getHours()<<11)|(now.getMinutes()<<5)|(now.getSeconds()>>1),dt=((Math.max(1980,now.getFullYear())-1980)<<9)|((now.getMonth()+1)<<5)|now.getDate();
- const crc32=b=>{let c=0xffffffff;for(let i=0;i<b.length;i++){c^=b[i];for(let j=0;j<8;j++)c=(c&1)?(0xedb88320^(c>>>1)):(c>>>1)}return(c^0xffffffff)>>>0};
- for(const f of entries){const n=enc.encode(f.name),b=f.bytes,crc=crc32(b),lh=new Uint8Array(30),ld=new DataView(lh.buffer);ld.setUint32(0,0x04034b50,true);ld.setUint16(4,20,true);ld.setUint16(6,0x0800,true);ld.setUint16(8,0,true);ld.setUint16(10,tm,true);ld.setUint16(12,dt,true);ld.setUint32(14,crc,true);ld.setUint32(18,b.length,true);ld.setUint32(22,b.length,true);ld.setUint16(26,n.length,true);locals.push(lh,n,b);
-  const ch=new Uint8Array(46),cd=new DataView(ch.buffer);cd.setUint32(0,0x02014b50,true);cd.setUint16(4,20,true);cd.setUint16(6,20,true);cd.setUint16(8,0x0800,true);cd.setUint16(10,0,true);cd.setUint16(12,tm,true);cd.setUint16(14,dt,true);cd.setUint32(16,crc,true);cd.setUint32(20,b.length,true);cd.setUint32(24,b.length,true);cd.setUint16(28,n.length,true);cd.setUint32(42,offset,true);centrals.push(ch,n);centralSize+=ch.length+n.length;offset+=lh.length+n.length+b.length
- }
- const end=new Uint8Array(22),ed=new DataView(end.buffer);ed.setUint32(0,0x06054b50,true);ed.setUint16(8,entries.length,true);ed.setUint16(10,entries.length,true);ed.setUint32(12,centralSize,true);ed.setUint32(16,offset,true);return new Blob([...locals,...centrals,end],{type:'application/zip'})
-}
-async function saveMapImages(){const btn=$('#save-pictures'),old=btn.textContent;btn.disabled=true;btn.textContent='製作圖檔…';try{
- const names={f1:'1F',f2:'2F',f3:'3F'},files=D.floors.map(f=>({name:'教學大樓'+(names[f.k]||f.k)+'_平面底圖.png',bytes:imageBytes(f.plan)}));
- files.push({name:'校園平面圖.jpg',bytes:imageBytes(D.img.campus)},{name:'校園空拍圖.jpg',bytes:imageBytes(D.img.aerial)});
- if(mode!=='aer'){try{renderer.render(scene,cam);const blob=await new Promise(resolve=>renderer.domElement.toBlob(resolve,'image/png'));if(blob)files.push({name:'目前互動3D畫面.png',bytes:new Uint8Array(await blob.arrayBuffer())})}catch(_){}}
- const url=URL.createObjectURL(imageZip(files)),a=document.createElement('a');a.href=url;a.download='國立臺南特教學校_互動式3D地圖圖檔.zip';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000)
- }catch(e){alert('圖檔整理失敗，請重新載入頁面後再試。')}finally{btn.disabled=false;btn.textContent=old}}
-$('#save-pictures').onclick=saveMapImages;
 init();
 </script></body></html>
