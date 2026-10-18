@@ -15,8 +15,8 @@ nav{display:flex;flex-wrap:wrap;gap:6px}
 #toolbar-panels.open{position:relative;z-index:5;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;background:var(--panel);border-bottom:1px solid var(--line)}
 #toolbar-panels .toolbar-card{position:static;max-width:none;width:100%;box-shadow:none;max-height:30vh;overflow:auto}
 button{font:inherit;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:4px 10px;cursor:pointer}
-button.on{background:var(--acc);border-color:var(--acc);color:#fff}
-#stage{position:relative;z-index:0;flex:1;min-height:0}
+button.on{background:var(--acc);border-color:var(--acc);color:#fff}.save-btn{border-color:var(--acc);color:var(--acc);font-weight:600}
+#stage{position:relative;z-index:0;flex:1;min-height:0}.floor-badge{position:absolute;z-index:3;left:12px;top:12px;padding:7px 12px;border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:8px;background:var(--panel);color:var(--fg);font-size:16px;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,.16);pointer-events:none}
 #stage canvas.gl{position:absolute;inset:0;width:100%;height:100%;display:block}
 .card{position:absolute;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;max-width:min(300px,calc(100% - 24px));box-shadow:0 2px 10px rgba(0,0,0,.12)}
 #info{font-size:12.5px}
@@ -37,7 +37,7 @@ button.on{background:var(--acc);border-color:var(--acc);color:#fff}
 @media(max-width:760px){html,body{height:auto;min-height:100%}body{min-height:100vh;overflow:auto}header{align-items:flex-start}header nav{width:100%}#stage{flex:none;height:58vh;min-height:240px}#toolbar-panels.open{grid-template-columns:minmax(0,1fr)}#toolbar-panels .toolbar-card{max-height:35vh}}
 </style></head><body>
 <header><h1>國立臺南特殊教育學校・互動式 3D 防災地圖</h1>
-<nav><button id="b-campus" class="on">校園</button><button id="b-bld">教學大樓 3D</button><button id="b-aer">空拍圖</button><button id="ctl-t" onclick="toggleCtl()">操作選項 ▸</button><button id="info-t" onclick="toggleInfo()">防救災資訊 ▸</button><button id="facility-t" onclick="toggleFacility()">設施定位 ▸</button></nav></header>
+<nav><button id="b-campus" class="on">校園</button><button id="b-bld">教學大樓 3D</button><button id="b-aer">空拍圖</button><button id="ctl-t" onclick="toggleCtl()">操作選項 ▸</button><button id="info-t" onclick="toggleInfo()">防救災資訊 ▸</button><button id="facility-t" onclick="toggleFacility()">設施定位 ▸</button><button id="save-pictures" class="save-btn" title="下載全部地圖底圖與目前 3D 畫面">⬇ 下載圖檔</button></nav></header>
 <div id="toolbar-panels" aria-label="操作選項、防救災資訊與設施定位"><div id="ctl-b" class="card toolbar-card hide">
 
 <div id="c-campus"><h3>校園 3D</h3><div class="mut">按住拖曳＝平移、滾輪或雙指縮放；按「拖曳」按鈕可切換旋轉。點「教學大樓」進入樓層。</div>
@@ -57,7 +57,7 @@ button.on{background:var(--acc);border-color:var(--acc);color:#fff}
 <table><tr><td>教育部校安中心</td><td>02-33437855／33437856</td></tr><tr><td>臺南市災害應變中心</td><td>06-2989119</td></tr><tr><td>安南區災害應變中心</td><td>06-2555667</td></tr><tr><td>國民及學前教育署</td><td>04-37061342</td></tr><tr><td>和順派出所</td><td>06-3554134</td></tr><tr><td>安和消防分隊</td><td>06-3551525</td></tr><tr><td>安南醫院</td><td>06-3553111</td></tr></table>
 <div class="mut" style="margin-top:4px">資料來源：校園防災地圖（地震災害）</div></div><div id="facility-b" class="card toolbar-card hide"><h3>設施定位</h3><div class="row"><button data-facility="outdoor">室外避難處</button><button data-facility="command">指揮中心</button><button data-facility="firstaid">急救站</button><button data-facility="health">健康中心</button><button data-facility="warehouse">防災倉庫</button><button data-facility="rescue">救援器材</button><button data-facility="comms">通訊設備</button><button data-facility="guard">警衛室</button><button data-facility="pickup">家長接送區</button><button data-facility="assembly">最終集合地點</button><button data-facility="wait2">2F等待救援區</button><button data-facility="wait3">3F等待救援區</button><button disabled title="提供AED位置後即可加入定位">AED（待補位置）</button></div></div></div><div id="stage">
 <div id="aer"><img id="aerimg" alt="校園空拍圖"></div>
-<div id="tip"></div>
+<div id="tip"></div><div id="floor-badge" class="floor-badge hide" aria-live="polite">教學大樓｜整棟樓層圖</div>
 
 <div id="wait" class="card hide"><button class="x" onclick="document.querySelector('#wait').classList.add('hide')" aria-label="關閉">×</button><h3 id="wait-t"></h3><div id="wait-d" class="mut"></div><div class="row"><button id="wait-go"></button></div></div>
 
@@ -74,7 +74,7 @@ function toggleCtl(){const b=$('#ctl-b'),o=b.classList.toggle('hide')===false;$(
 function toggleInfo(){const b=$('#info-b'),o=b.classList.toggle('hide')===false;$('#info-t').textContent='防救災資訊'+(o?' ▾':' ▸');updateToolbarPanels()}
 function toggleFacility(){const b=$('#facility-b'),o=b.classList.toggle('hide')===false;$('#facility-t').textContent='設施定位'+(o?' ▾':' ▸');updateToolbarPanels()}
 const stage=$('#stage');
-const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
 renderer.domElement.className='gl';stage.insertBefore(renderer.domElement,stage.firstChild);
 const scene=new THREE.Scene();
@@ -162,7 +162,8 @@ function drawRoutes(o,t){const c=o.ctx,f=o.f;c.setLineDash([]);c.clearRect(0,0,f
   o.paths.forEach(p=>{c.setLineDash([]);c.strokeStyle='rgba(214,40,32,.22)';c.lineWidth=11;c.stroke(p);c.strokeStyle='#d62820';c.lineWidth=5.5;c.setLineDash([16,11]);c.lineDashOffset=-t*26;c.stroke(p)});
   if(f.blink){const a=.2+.8*(.5+.5*Math.sin(t*6));c.globalAlpha=a;c.setLineDash([10,6]);c.strokeStyle='#c2281f';c.lineWidth=5;c.strokeRect(...f.blink);c.globalAlpha=1;c.setLineDash([])}}
  o.rt.needsUpdate=true}
-function setMode(m){mode=m;$('#wait').classList.add('hide');
+function updateFloorBadge(){const labels={all:'整棟',f1:'1F',f2:'2F',f3:'3F'};$('#floor-badge').textContent='教學大樓｜'+(labels[focus]||'整棟')+' 樓層圖'}
+function setMode(m){mode=m;$('#wait').classList.add('hide');$('#floor-badge').classList.toggle('hide',m!=='bld');if(m==='bld')updateFloorBadge();
  campus.visible=m==='campus';bld.visible=m==='bld';
  renderer.domElement.style.display=m==='aer'?'none':'block';$('#aer').style.display=m==='aer'?'block':'none';
  $('#c-campus').classList.toggle('hide',m!=='campus');$('#c-bld').classList.toggle('hide',m!=='bld');$('#c-aer').classList.toggle('hide',m!=='aer');
@@ -177,8 +178,8 @@ $('#k-wall').onchange=e=>walls.visible=e.target.checked;$('#k-pin').onchange=e=>
 function focusFacility(key){const p=PINS.find(x=>x[3]===key),xy=p?[p[0],p[1]]:key==='wait2'?[770,169]:key==='wait3'?[770,128]:null;if(!xy)return;if(mode!=='campus')setMode('campus');selectedFacility=key;const[wx,wz]=g2w(...xy),offset=cam.position.clone().sub(ctl.target);offset.setLength(Math.min(44,Math.max(26,offset.length()*.62)));view([wx+offset.x,Math.max(10,offset.y),wz+offset.z],[wx,0,wz],750)}
 document.querySelectorAll('[data-facility]').forEach(b=>b.onclick=()=>focusFacility(b.dataset.facility));
 $('#v2-iso').onclick=()=>view([20,26,36],[0,2.5,0]);$('#v2-top').onclick=()=>view([0,52,.1],[0,0,0]);$('#v2-side').onclick=()=>view([0,wh*1.5+extra,48],[0,wh*1.5+extra,0]);
-document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{focus=b.dataset.f;document.querySelectorAll('[data-f]').forEach(x=>x.classList.toggle('on',x===b));layout();
- if(focus!=='all'){view([8,wh+20,20],[0,0,0])}});
+document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{focus=b.dataset.f;updateFloorBadge();document.querySelectorAll('[data-f]').forEach(x=>x.classList.toggle('on',x===b));layout();
+ if(focus!=='all'){view([8,wh+20,20],[0,0,0])}else{const mid=(FL.length-1)*(wh+.2+extra)/2+.2;view([20,mid+24,36],[0,mid,0])}});
 $('#wh').oninput=e=>{wh=+e.target.value;layout()};$('#gap').oninput=e=>{extra=+e.target.value;layout()};
 $('#k-route').onchange=e=>routesOn=e.target.checked;
 $('#k-tex').onchange=e=>FL.forEach(o=>o.plane.visible=e.target.checked);
@@ -209,5 +210,22 @@ const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
 function loop(){requestAnimationFrame(loop);const t=reduce?0:performance.now()/1000;ctl.update();
  if(mode==='campus')rings.forEach((r,i)=>{const k=(t*.6+i*.2)%1;r.scale.setScalar(1+k*(r.userData.pinKey===selectedFacility?9:(r.userData.s||4)));r.material.opacity=.9*(1-k)});
  if(mode!=='aer'){FL.forEach(o=>drawRoutes(o,t));renderer.render(scene,cam)}}
+function imageBytes(src){const raw=atob(src.slice(src.indexOf(',')+1)),out=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)out[i]=raw.charCodeAt(i);return out}
+function imageZip(entries){
+ const enc=new TextEncoder(),locals=[],centrals=[];let offset=0,centralSize=0;
+ const now=new Date(),tm=(now.getHours()<<11)|(now.getMinutes()<<5)|(now.getSeconds()>>1),dt=((Math.max(1980,now.getFullYear())-1980)<<9)|((now.getMonth()+1)<<5)|now.getDate();
+ const crc32=b=>{let c=0xffffffff;for(let i=0;i<b.length;i++){c^=b[i];for(let j=0;j<8;j++)c=(c&1)?(0xedb88320^(c>>>1)):(c>>>1)}return(c^0xffffffff)>>>0};
+ for(const f of entries){const n=enc.encode(f.name),b=f.bytes,crc=crc32(b),lh=new Uint8Array(30),ld=new DataView(lh.buffer);ld.setUint32(0,0x04034b50,true);ld.setUint16(4,20,true);ld.setUint16(6,0x0800,true);ld.setUint16(8,0,true);ld.setUint16(10,tm,true);ld.setUint16(12,dt,true);ld.setUint32(14,crc,true);ld.setUint32(18,b.length,true);ld.setUint32(22,b.length,true);ld.setUint16(26,n.length,true);locals.push(lh,n,b);
+  const ch=new Uint8Array(46),cd=new DataView(ch.buffer);cd.setUint32(0,0x02014b50,true);cd.setUint16(4,20,true);cd.setUint16(6,20,true);cd.setUint16(8,0x0800,true);cd.setUint16(10,0,true);cd.setUint16(12,tm,true);cd.setUint16(14,dt,true);cd.setUint32(16,crc,true);cd.setUint32(20,b.length,true);cd.setUint32(24,b.length,true);cd.setUint16(28,n.length,true);cd.setUint32(42,offset,true);centrals.push(ch,n);centralSize+=ch.length+n.length;offset+=lh.length+n.length+b.length
+ }
+ const end=new Uint8Array(22),ed=new DataView(end.buffer);ed.setUint32(0,0x06054b50,true);ed.setUint16(8,entries.length,true);ed.setUint16(10,entries.length,true);ed.setUint32(12,centralSize,true);ed.setUint32(16,offset,true);return new Blob([...locals,...centrals,end],{type:'application/zip'})
+}
+async function saveMapImages(){const btn=$('#save-pictures'),old=btn.textContent;btn.disabled=true;btn.textContent='製作圖檔…';try{
+ const names={f1:'1F',f2:'2F',f3:'3F'},files=D.floors.map(f=>({name:'教學大樓'+(names[f.k]||f.k)+'_平面底圖.png',bytes:imageBytes(f.plan)}));
+ files.push({name:'校園平面圖.jpg',bytes:imageBytes(D.img.campus)},{name:'校園空拍圖.jpg',bytes:imageBytes(D.img.aerial)});
+ if(mode!=='aer'){try{renderer.render(scene,cam);const blob=await new Promise(resolve=>renderer.domElement.toBlob(resolve,'image/png'));if(blob)files.push({name:'目前互動3D畫面.png',bytes:new Uint8Array(await blob.arrayBuffer())})}catch(_){}}
+ const url=URL.createObjectURL(imageZip(files)),a=document.createElement('a');a.href=url;a.download='國立臺南特教學校_互動式3D地圖圖檔.zip';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000)
+ }catch(e){alert('圖檔整理失敗，請重新載入頁面後再試。')}finally{btn.disabled=false;btn.textContent=old}}
+$('#save-pictures').onclick=saveMapImages;
 init();
 </script></body></html>
