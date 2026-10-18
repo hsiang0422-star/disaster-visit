@@ -16,7 +16,7 @@ nav{display:flex;flex-wrap:wrap;gap:6px}
 #toolbar-panels .toolbar-card{position:static;max-width:none;width:100%;box-shadow:none;max-height:30vh;overflow:auto}
 button{font:inherit;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:4px 10px;cursor:pointer}
 button.on{background:var(--acc);border-color:var(--acc);color:#fff}
-#stage{position:relative;z-index:0;flex:1;min-height:0}.floor-badge{position:absolute;z-index:3;left:12px;top:12px;padding:7px 12px;border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:8px;background:var(--panel);color:var(--fg);font-size:16px;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,.16);pointer-events:none}
+#stage{position:relative;z-index:0;flex:1;min-height:0}
 #stage canvas.gl{position:absolute;inset:0;width:100%;height:100%;display:block}
 .card{position:absolute;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;max-width:min(300px,calc(100% - 24px));box-shadow:0 2px 10px rgba(0,0,0,.12)}
 #info{font-size:12.5px}
@@ -57,7 +57,7 @@ button.on{background:var(--acc);border-color:var(--acc);color:#fff}
 <table><tr><td>教育部校安中心</td><td>02-33437855／33437856</td></tr><tr><td>臺南市災害應變中心</td><td>06-2989119</td></tr><tr><td>安南區災害應變中心</td><td>06-2555667</td></tr><tr><td>國民及學前教育署</td><td>04-37061342</td></tr><tr><td>和順派出所</td><td>06-3554134</td></tr><tr><td>安和消防分隊</td><td>06-3551525</td></tr><tr><td>安南醫院</td><td>06-3553111</td></tr></table>
 <div class="mut" style="margin-top:4px">資料來源：校園防災地圖（地震災害）</div></div><div id="facility-b" class="card toolbar-card hide"><h3>設施定位</h3><div class="row"><button data-facility="outdoor">室外避難處</button><button data-facility="command">指揮中心</button><button data-facility="firstaid">急救站</button><button data-facility="health">健康中心</button><button data-facility="warehouse">防災倉庫</button><button data-facility="rescue">救援器材</button><button data-facility="comms">通訊設備</button><button data-facility="guard">警衛室</button><button data-facility="pickup">家長接送區</button><button data-facility="assembly">最終集合地點</button><button data-facility="wait2">2F等待救援區</button><button data-facility="wait3">3F等待救援區</button><button disabled title="提供AED位置後即可加入定位">AED（待補位置）</button></div></div></div><div id="stage">
 <div id="aer"><img id="aerimg" alt="校園空拍圖"></div>
-<div id="tip"></div><div id="floor-badge" class="floor-badge hide" aria-live="polite">教學大樓｜整棟樓層圖</div>
+<div id="tip"></div>
 
 <div id="wait" class="card hide"><button class="x" onclick="document.querySelector('#wait').classList.add('hide')" aria-label="關閉">×</button><h3 id="wait-t"></h3><div id="wait-d" class="mut"></div><div class="row"><button id="wait-go"></button></div></div>
 
@@ -134,9 +134,9 @@ async function init(){
   const rp=new THREE.Mesh(new THREE.PlaneGeometry(pw,ph),rm);rp.rotation.x=-Math.PI/2;rp.position.set(cx,.04,cz);rp.renderOrder=2;
   const labs=new THREE.Group();
   f.labs.forEach(([n,x,y])=>{const l=label(n,1.25);l.position.set(fx(f,x),0,fz(f,y));labs.add(l)});
-  const ft=label(['1F','2F','3F'][i],2,'#fff','#1d2733');ft.position.set(fx(f,60),0,fz(f,H1*.62));labs.add(ft);
-  g.add(slab,plane,wall,rp,labs);bld.add(g);
-  FL.push({f,g,wall,slab,wm,sm,pm,rm,rt,c,ctx:c.getContext('2d'),labs,plane,paths:f.routes.map(d=>new Path2D(d)),op:1,k:f.k})});
+  const floorTag=new THREE.Group(),ft=label(['1F','2F','3F'][i],2,'#fff','#1d2733');ft.position.set(fx(f,60),0,fz(f,H1*.62));floorTag.add(ft);
+  g.add(slab,plane,wall,rp,labs,floorTag);bld.add(g);
+  FL.push({f,g,wall,slab,wm,sm,pm,rm,rt,c,ctx:c.getContext('2d'),labs,floorTag,plane,paths:f.routes.map(d=>new Path2D(d)),op:1,k:f.k})});
  // waiting-rescue markers (map positions)
  [['f2',770,169,'2F 等待救援區'],['f3',770,128,'3F 等待救援區']].forEach(([k,gx,gy,nm])=>{const[wx,wz]=g2w(gx,gy),ry=3.1;
   const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');x.fillStyle='#2e9e4f';x.fillRect(0,0,128,128);x.strokeStyle='#fff';x.lineWidth=8;x.strokeRect(6,6,116,116);x.fillStyle='#fff';x.font='bold 64px sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText(nm.slice(0,2),64,68);
@@ -152,18 +152,17 @@ async function init(){
 }
 function pose(){if(mode==='campus'){const[px,pz]=g2w(500+(H1/2-45)*KG,100+(1500-W1/2)*KG);bld.rotation.y=Math.PI/2;bld.scale.setScalar(GS);bld.position.set(px,0,pz)}
  else{bld.rotation.y=0;bld.scale.setScalar(1);bld.position.set(0,0,0)}}
-function layout(){const h=mode==='campus'?cWh:wh,e=mode==='campus'?0:extra;
- FL.forEach((o,i)=>{o.g.position.y=i*(h+.2+e)+.2;o.wall.scale.y=h;
-  const on=mode==='campus'||focus==='all'||focus===o.k;o.op=on?1:.08;
+function layout(){const h=mode==='campus'?cWh:wh,e=mode==='campus'?0:extra,isolated=mode==='bld'&&focus!=='all',center=isolated?FL.findIndex(o=>o.k===focus):-1,step=h+(isolated?2.2:.2)+e;
+ FL.forEach((o,i)=>{let level=i;if(mode==='bld'&&center>=0&&focus!=='all'){const relative=(i-center+FL.length)%FL.length;level=relative===0?0:relative===1?1:-1}o.g.position.y=level*step+.2;o.wall.scale.y=h;
+  const on=mode==='campus'||focus==='all'||focus===o.k;o.op=on?1:.06;
   [o.wm,o.sm,o.pm,o.rm].forEach(m=>{m.opacity=o.op});o.wm.depthWrite=o.sm.depthWrite=o.op>.5;
-  o.labs.visible=mode==='bld'&&on&&$('#k-lab').checked;o.labs.children.forEach(l=>l.position.y=h+.9)})}
+  o.labs.visible=mode==='bld'&&on&&$('#k-lab').checked;o.labs.children.forEach(l=>l.position.y=h+.9);o.floorTag.visible=mode==='bld';o.floorTag.children.forEach(l=>l.position.y=h+.9)})}
 function drawRoutes(o,t){const c=o.ctx,f=o.f;c.setLineDash([]);c.clearRect(0,0,f.W,f.H);
  if(routesOn&&o.op>.5){c.lineCap='round';c.lineJoin='round';
   o.paths.forEach(p=>{c.setLineDash([]);c.strokeStyle='rgba(214,40,32,.22)';c.lineWidth=11;c.stroke(p);c.strokeStyle='#d62820';c.lineWidth=5.5;c.setLineDash([16,11]);c.lineDashOffset=-t*26;c.stroke(p)});
   if(f.blink){const a=.2+.8*(.5+.5*Math.sin(t*6));c.globalAlpha=a;c.setLineDash([10,6]);c.strokeStyle='#c2281f';c.lineWidth=5;c.strokeRect(...f.blink);c.globalAlpha=1;c.setLineDash([])}}
  o.rt.needsUpdate=true}
-function updateFloorBadge(){const labels={all:'整棟',f1:'1F',f2:'2F',f3:'3F'};$('#floor-badge').textContent='教學大樓｜'+(labels[focus]||'整棟')+' 樓層圖'}
-function setMode(m){mode=m;$('#wait').classList.add('hide');$('#floor-badge').classList.toggle('hide',m!=='bld');if(m==='bld')updateFloorBadge();
+function setMode(m){mode=m;$('#wait').classList.add('hide');
  campus.visible=m==='campus';bld.visible=m==='bld';
  renderer.domElement.style.display=m==='aer'?'none':'block';$('#aer').style.display=m==='aer'?'block':'none';
  $('#c-campus').classList.toggle('hide',m!=='campus');$('#c-bld').classList.toggle('hide',m!=='bld');$('#c-aer').classList.toggle('hide',m!=='aer');
@@ -178,8 +177,8 @@ $('#k-wall').onchange=e=>walls.visible=e.target.checked;$('#k-pin').onchange=e=>
 function focusFacility(key){const p=PINS.find(x=>x[3]===key),xy=p?[p[0],p[1]]:key==='wait2'?[770,169]:key==='wait3'?[770,128]:null;if(!xy)return;if(mode!=='campus')setMode('campus');selectedFacility=key;const[wx,wz]=g2w(...xy),offset=cam.position.clone().sub(ctl.target);offset.setLength(Math.min(44,Math.max(26,offset.length()*.62)));view([wx+offset.x,Math.max(10,offset.y),wz+offset.z],[wx,0,wz],750)}
 document.querySelectorAll('[data-facility]').forEach(b=>b.onclick=()=>focusFacility(b.dataset.facility));
 $('#v2-iso').onclick=()=>view([20,26,36],[0,2.5,0]);$('#v2-top').onclick=()=>view([0,52,.1],[0,0,0]);$('#v2-side').onclick=()=>view([0,wh*1.5+extra,48],[0,wh*1.5+extra,0]);
-document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{focus=b.dataset.f;updateFloorBadge();document.querySelectorAll('[data-f]').forEach(x=>x.classList.toggle('on',x===b));layout();
- if(focus!=='all'){const i=FL.findIndex(o=>o.k===focus),y=i*(wh+.2+extra);view([8,y+22,20],[0,y,0])}});
+document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{focus=b.dataset.f;document.querySelectorAll('[data-f]').forEach(x=>x.classList.toggle('on',x===b));layout();
+ if(focus!=='all'){view([8,wh+20,20],[0,0,0])}});
 $('#wh').oninput=e=>{wh=+e.target.value;layout()};$('#gap').oninput=e=>{extra=+e.target.value;layout()};
 $('#k-route').onchange=e=>routesOn=e.target.checked;
 $('#k-tex').onchange=e=>FL.forEach(o=>o.plane.visible=e.target.checked);
