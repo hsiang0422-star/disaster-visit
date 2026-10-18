@@ -118,7 +118,7 @@ const evacuationPaths=[
  [[1345,1075],[1318,1078],[1288,1055],[1255,1025],[1222,995],[1190,965],[1158,935],[1122,905],[1080,870],[1038,830],[998,795],[960,760]]
 ];
 function makeWalker(monochrome=false){
- const person=new THREE.Group(),skin=new THREE.MeshBasicMaterial({color:monochrome?0x111111:0xffd9ae}),vest=new THREE.MeshBasicMaterial({color:monochrome?0x111111:0xf08a24}),pants=new THREE.MeshBasicMaterial({color:monochrome?0x111111:0x234c78}),outline=new THREE.MeshBasicMaterial({color:monochrome?0x111111:0xffffff});
+ const person=new THREE.Group(),skin=new THREE.MeshBasicMaterial({color:0x111111}),vest=new THREE.MeshBasicMaterial({color:monochrome?0x111111:0x14532d}),pants=new THREE.MeshBasicMaterial({color:monochrome?0x111111:0x234c78}),outline=new THREE.MeshBasicMaterial({color:0x111111});
  const part=(geo,mat)=>{const m=new THREE.Mesh(geo,mat);m.renderOrder=6;person.add(m);return m};
  part(new THREE.SphereGeometry(.095,12,10),outline).position.set(0,.62,0);
  part(new THREE.SphereGeometry(.069,12,10),skin).position.set(0,.62,.015);
