@@ -11,8 +11,9 @@ header{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;padding:8px 1
 h1{font-size:16px;margin:0}
 nav{display:flex;flex-wrap:wrap;gap:6px}
 #ctl-t,#info-t{white-space:nowrap}
-#toolbar-panels{display:none;padding:8px 12px 10px}
-#toolbar-panels.open{position:relative;z-index:5;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;background:var(--panel);border-bottom:1px solid var(--line)}
+#toolbar-panels{display:none;padding:34px 10px 10px}
+#toolbar-panels.open{position:fixed;z-index:20;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:min(640px,calc(100vw - 24px));max-height:78vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.24)}
+#toolbar-drag-handle{position:absolute;top:0;left:0;right:0;height:30px;display:flex;align-items:center;padding:0 12px;border-bottom:1px solid var(--line);border-radius:12px 12px 0 0;background:var(--bg);color:var(--mut);font-size:12px;font-weight:600;cursor:move;touch-action:none;user-select:none;-webkit-user-select:none}
 #toolbar-panels .toolbar-card{position:static;max-width:none;width:100%;box-shadow:none;max-height:30vh;overflow:auto}
 button{font:inherit;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:4px 10px;cursor:pointer}
 button.on{background:var(--acc);border-color:var(--acc);color:#fff}.save-btn{border-color:var(--acc);color:var(--acc);font-weight:600}
@@ -34,11 +35,11 @@ button.on{background:var(--acc);border-color:var(--acc);color:#fff}.save-btn{bor
 #aer{position:absolute;inset:0;overflow:hidden;display:none;background:#000;touch-action:none;cursor:grab}
 #aer img{position:absolute;left:0;top:0;transform-origin:0 0;user-select:none;-webkit-user-drag:none}
 .hide{display:none!important}
-@media(max-width:760px){html,body{height:auto;min-height:100%}body{min-height:100vh;overflow:auto}header{align-items:flex-start}header nav{width:100%}#stage{flex:none;height:58vh;min-height:240px}#toolbar-panels.open{grid-template-columns:minmax(0,1fr)}#toolbar-panels .toolbar-card{max-height:35vh}}
+@media(max-width:760px){html,body{height:auto;min-height:100%}body{min-height:100vh;overflow:auto}header{align-items:flex-start}header nav{width:100%}#stage{flex:none;height:58vh;min-height:240px}#toolbar-panels.open{grid-template-columns:minmax(0,1fr);max-height:78vh}#toolbar-panels .toolbar-card{max-height:35vh}}
 </style></head><body>
 <header><h1>國立臺南特殊教育學校・互動式 3D 防災地圖</h1>
 <nav><button id="b-campus" class="on">校園</button><button id="b-bld">教學大樓 3D</button><button id="b-aer">空拍圖</button><button id="ctl-t" onclick="toggleCtl()">操作選項 ▸</button><button id="info-t" onclick="toggleInfo()">防救災資訊 ▸</button><button id="facility-t" onclick="toggleFacility()">設施定位 ▸</button><button id="save-pictures" class="save-btn" title="下載全部地圖底圖與目前 3D 畫面">⬇ 下載圖檔</button></nav></header>
-<div id="toolbar-panels" aria-label="操作選項、防救災資訊與設施定位"><div id="ctl-b" class="card toolbar-card hide">
+<div id="toolbar-panels" aria-label="操作選項、防救災資訊與設施定位"><div id="toolbar-drag-handle" aria-label="按住拖曳移動選項框">⠿　按住此處拖曳移動</div><div id="ctl-b" class="card toolbar-card hide">
 
 <div id="c-campus"><h3>校園 3D</h3><div class="mut">按住拖曳＝平移、滾輪或雙指縮放；按「拖曳」按鈕可切換旋轉。點「教學大樓」進入樓層。</div>
 <div class="row"><button id="v-iso">斜視</button><button id="v-top">俯視</button><button class="pan">拖曳：平移</button></div>
@@ -69,10 +70,11 @@ const D={"floors": [{"k": "f1", "s": 1.0, "tx": 0, "ty": 0, "W": 1602, "H": 952,
 const $=s=>document.querySelector(s);
 const loadImg=s=>new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.src=s});
 function showWait(k){const f=k==='f2'?'2F':'3F';$('#wait-t').textContent='教學大樓 '+f+' 等待救援區';$('#wait-d').textContent='這裡是教學大樓 '+f+' 的等待救援區，無法自行避難者在此等候救援人員協助。';$('#wait-go').textContent='查看 '+f+' 樓層平面與動線';$('#wait-go').onclick=()=>{setMode('bld');document.querySelector('[data-f="'+k+'"]').click()};$('#wait').classList.remove('hide')}
-function updateToolbarPanels(){const p=$('#toolbar-panels');if(p)p.classList.toggle('open',!$('#ctl-b').classList.contains('hide')||!$('#info-b').classList.contains('hide')||!$('#facility-b').classList.contains('hide'))}
+let toolbarPanelPositioned=false;function updateToolbarPanels(){const p=$('#toolbar-panels');if(!p)return;const open=!$('#ctl-b').classList.contains('hide')||!$('#info-b').classList.contains('hide')||!$('#facility-b').classList.contains('hide');p.classList.toggle('open',open);if(open&&!toolbarPanelPositioned)requestAnimationFrame(()=>{const h=document.querySelector('header').getBoundingClientRect(),r=p.getBoundingClientRect();p.style.left=Math.max(8,Math.min(12,innerWidth-r.width-8))+'px';p.style.top=Math.max(8,Math.min(h.bottom+8,innerHeight-r.height-8))+'px';toolbarPanelPositioned=true})}
 function toggleCtl(){const b=$('#ctl-b'),o=b.classList.toggle('hide')===false;$('#ctl-t').textContent='操作選項'+(o?' ▾':' ▸');updateToolbarPanels()}
 function toggleInfo(){const b=$('#info-b'),o=b.classList.toggle('hide')===false;$('#info-t').textContent='防救災資訊'+(o?' ▾':' ▸');updateToolbarPanels()}
 function toggleFacility(){const b=$('#facility-b'),o=b.classList.toggle('hide')===false;$('#facility-t').textContent='設施定位'+(o?' ▾':' ▸');updateToolbarPanels()}
+const toolbarPanel=$('#toolbar-panels'),toolbarDrag=$('#toolbar-drag-handle');let toolbarDragState=null;toolbarDrag.addEventListener('pointerdown',e=>{if(e.button!==undefined&&e.button!==0)return;const r=toolbarPanel.getBoundingClientRect();toolbarDragState={id:e.pointerId,x:e.clientX,y:e.clientY,left:r.left,top:r.top};toolbarDrag.setPointerCapture(e.pointerId);e.preventDefault()});toolbarDrag.addEventListener('pointermove',e=>{if(!toolbarDragState||toolbarDragState.id!==e.pointerId)return;const left=toolbarDragState.left+e.clientX-toolbarDragState.x,top=toolbarDragState.top+e.clientY-toolbarDragState.y;toolbarPanel.style.left=Math.max(8,Math.min(innerWidth-toolbarPanel.offsetWidth-8,left))+'px';toolbarPanel.style.top=Math.max(8,Math.min(innerHeight-toolbarPanel.offsetHeight-8,top))+'px'});const stopToolbarDrag=e=>{if(toolbarDragState&&toolbarDragState.id===e.pointerId)toolbarDragState=null};toolbarDrag.addEventListener('pointerup',stopToolbarDrag);toolbarDrag.addEventListener('pointercancel',stopToolbarDrag);window.addEventListener('resize',()=>{if(!toolbarPanel.classList.contains('open'))return;const r=toolbarPanel.getBoundingClientRect();toolbarPanel.style.left=Math.max(8,Math.min(innerWidth-r.width-8,r.left))+'px';toolbarPanel.style.top=Math.max(8,Math.min(innerHeight-r.height-8,r.top))+'px'});
 const stage=$('#stage');
 const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
