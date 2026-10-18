@@ -47,7 +47,7 @@ button.on{background:var(--acc);border-color:var(--acc);color:#fff}.save-btn{bor
 
 <div id="c-campus"><h3>校園 3D</h3><div class="mut">按住拖曳＝平移、滾輪或雙指縮放；按「拖曳」按鈕可切換旋轉。若要查看樓層，請點上方「教學大樓 3D」按鈕。</div>
 <div class="row"><button id="v-iso">斜視</button><button id="v-top">俯視</button><button class="pan">拖曳：平移</button></div>
-<div class="row"><label class="mut"><input type="checkbox" id="k-wall" checked> 建築量體</label><label class="mut"><input type="checkbox" id="k-pin" checked> 設施標示</label><label class="mut"><input type="checkbox" id="k-roof" checked> 教學大樓屋頂</label><label class="mut"><input type="checkbox" id="k-walk" checked> 疏散人流</label></div></div>
+<div class="row"><label class="mut"><input type="checkbox" id="k-wall" checked> 建築量體</label><label class="mut"><input type="checkbox" id="k-pin" checked> 設施標示</label><label class="mut"><input type="checkbox" id="k-roof" checked> 教學大樓屋頂</label><label class="mut"><input type="checkbox" id="k-walk" checked> 疏散人流（500人）</label></div></div>
 <div id="c-bld" class="hide"><h3>教學大樓 1F–3F</h3>
 <div class="row"><button data-f="all" class="on">整棟</button><button data-f="f3">3F</button><button data-f="f2">2F</button><button data-f="f1">1F</button></div>
 <div class="row mut">牆高 <input type="range" id="wh" min="1" max="4" step="0.1" value="2"></div>
@@ -129,9 +129,9 @@ function makeWalker(){
 }
 function initWalkers(){
  const routeCurves=evacuationPaths.map(points=>new THREE.CatmullRomCurve3(points.map(([x,y])=>{const [wx,wz]=g2w(x/2,y/2);return new THREE.Vector3(wx,0,wz)}),false,'centripetal'));
- const queueCenter=g2w(480,380),forward=new THREE.Vector3(-.86,0,.51).normalize(),side=new THREE.Vector3(-forward.z,0,forward.x);
- const queueCols=10,queueSpacing=.25,speed=3.2;
- for(let i=0;i<100;i++){
+ const queueCenter=g2w(450,447),forward=new THREE.Vector3(-.86,0,.51).normalize(),side=new THREE.Vector3(-forward.z,0,forward.x);
+ const walkerCount=500,queueCols=25,queueSpacing=.21,speed=3.2;
+ for(let i=0;i<walkerCount;i++){
   const pathIndex=i%routeCurves.length,routeIndex=Math.floor(i/routeCurves.length),curve=routeCurves[pathIndex],length=curve.getLength();
   const col=i%queueCols,row=Math.floor(i/queueCols),slot=new THREE.Vector3(queueCenter[0],0,queueCenter[1]);
   slot.addScaledVector(side,(col-(queueCols-1)/2)*queueSpacing);
