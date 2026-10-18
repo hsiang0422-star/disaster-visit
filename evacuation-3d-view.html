@@ -92,7 +92,7 @@ function label(txt,sz=1.6,col='#1d2733',bg='rgba(255,255,255,.88)'){
  x.fillStyle=col;x.textAlign='center';x.textBaseline='middle';x.fillText(txt,256,66);
  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthTest:false}));
  s.scale.set(sz*4,sz,1);s.renderOrder=10;return s}
-function leader(x,z,fromY,toY){const h=Math.max(.05,toY-fromY),m=new THREE.Mesh(new THREE.CylinderGeometry(.045,.045,h,8),new THREE.MeshBasicMaterial({color:0xffcc33,depthTest:false}));m.position.set(x,fromY+h/2,z);m.renderOrder=9;pins.add(m);const d=new THREE.Mesh(new THREE.SphereGeometry(.13,12,8),new THREE.MeshBasicMaterial({color:0xffcc33,depthTest:false}));d.position.set(x,fromY,z);d.renderOrder=9;pins.add(d)}
+function leader(x,z,fromY,toY){const h=Math.max(.05,toY-fromY),make=(r,c)=>new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,10),new THREE.MeshBasicMaterial({color:c,depthTest:false}));const edge=make(.13,0x173b32),core=make(.065,0xffd43b);[edge,core].forEach(m=>{m.position.set(x,fromY+h/2,z);m.renderOrder=9;pins.add(m)});const dot=new THREE.Mesh(new THREE.SphereGeometry(.2,12,8),new THREE.MeshBasicMaterial({color:0x173b32,depthTest:false})),center=new THREE.Mesh(new THREE.SphereGeometry(.11,12,8),new THREE.MeshBasicMaterial({color:0xffd43b,depthTest:false}));[dot,center].forEach(m=>{m.position.set(x,fromY,z);m.renderOrder=9;pins.add(m)})}
 let mode='campus',campus=new THREE.Group(),bld=new THREE.Group(),walls=new THREE.Group(),pins=new THREE.Group(),hits=[],rings=[],waits=[],bhits=[];
 scene.add(campus,bld);campus.add(walls,pins);
 const CW=64,CH=CW*1382/2140,g2w=(gx,gy)=>[(gx*2/2140-.5)*CW,(gy*2/1382-.5)*CH];
