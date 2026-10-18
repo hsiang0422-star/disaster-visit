@@ -140,7 +140,7 @@ function initWalkers(){
   slot.addScaledVector(side,(col-(queueCols-1)/2)*queueSpacing);
   slot.addScaledVector(forward,-row*queueSpacing);
   const last=curve.getPointAt(1),approach=new THREE.CatmullRomCurve3([last,new THREE.Vector3((last.x+slot.x)/2,0,(last.z+slot.z)/2),slot],false,'centripetal');
-  const w=makeWalker();w.person.scale.setScalar(.9);walkersLayer.add(w.person);
+  const w=makeWalker();w.person.traverse(m=>{if(m.isMesh){m.renderOrder=40;m.material.depthTest=false;m.material.depthWrite=false}});w.person.scale.setScalar(.9);walkersLayer.add(w.person);
   walkers.push({...w,curve,length,approach,approachLength:approach.getLength(),slot,depart:pathIndex===1?routeIndex*.18:8.5+routeIndex*.18,speed,pathIndex,step:i*.71,travelled:false});
  }
 }
