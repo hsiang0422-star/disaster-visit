@@ -12,13 +12,13 @@ h1{font-size:16px;margin:0}
 nav{display:flex;flex-wrap:wrap;gap:6px}
 #ctl-t,#info-t{white-space:nowrap}
 #toolbar-panels{display:none;padding:34px 10px 10px}
-#toolbar-panels.open{position:fixed;z-index:20;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;width:min(640px,calc(100vw - 24px));min-width:min(320px,calc(100vw - 24px));min-height:160px;max-width:calc(100vw - 16px);max-height:calc(100vh - 16px);resize:both;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.24)}
-#toolbar-drag-handle{position:absolute;top:0;left:0;right:0;height:30px;display:flex;align-items:center;padding:0 8px 0 12px;border-bottom:1px solid var(--line);border-radius:12px 12px 0 0;background:var(--bg);color:var(--mut);font-size:12px;font-weight:600;cursor:move;touch-action:none;user-select:none;-webkit-user-select:none}#toolbar-close{margin-left:auto;padding:0 7px;border:0;background:transparent;font-size:18px;line-height:1;cursor:pointer}
-#toolbar-panels .toolbar-card{position:static;max-width:none;width:100%;box-shadow:none;max-height:30vh;overflow:auto;padding:7px 9px;font-size:12px}
-#toolbar-panels .toolbar-card h3{font-size:12px;margin:0 0 3px}
-#toolbar-panels .row{gap:4px;margin:4px 0}
-#toolbar-panels .toolbar-card button{font-size:12px;padding:3px 7px;border-radius:5px}
-#toolbar-panels .mut{font-size:11px}
+#toolbar-panels.open{position:fixed;z-index:20;display:grid;grid-template-columns:minmax(0,1fr);gap:4px;width:min(330px,calc(100vw - 16px));min-width:min(250px,calc(100vw - 16px));min-height:min(300px,calc(100vh - 24px));max-width:calc(100vw - 16px);max-height:calc(100vh - 16px);resize:both;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.24)}
+#toolbar-drag-handle{position:absolute;top:0;left:0;right:0;height:30px;display:flex;align-items:center;padding:0 8px 0 12px;border-bottom:1px solid var(--line);border-radius:12px 12px 0 0;background:var(--bg);color:var(--mut);font-size:10px;font-weight:600;cursor:move;touch-action:none;user-select:none;-webkit-user-select:none}#toolbar-close{margin-left:auto;padding:0 7px;border:0;background:transparent;font-size:18px;line-height:1;cursor:pointer}
+#toolbar-panels .toolbar-card{position:static;max-width:none;width:100%;box-shadow:none;max-height:none;overflow:visible;padding:6px 8px;font-size:10px;line-height:1.35}
+#toolbar-panels .toolbar-card h3{font-size:10px;margin:0 0 2px}
+#toolbar-panels .row{gap:3px;margin:3px 0}
+#toolbar-panels .toolbar-card button{font-size:10px;padding:3px 6px;border-radius:5px}
+#toolbar-panels .mut{font-size:10px}
 button{font:inherit;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:4px 10px;cursor:pointer}
 button.on{background:var(--acc);border-color:var(--acc);color:#fff}.save-btn{border-color:var(--acc);color:var(--acc);font-weight:600}
 #stage{position:relative;z-index:0;flex:1;min-height:0}.floor-badge{position:absolute;z-index:3;left:12px;top:12px;padding:7px 12px;border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:8px;background:var(--panel);color:var(--fg);font-size:16px;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,.16);pointer-events:none}
@@ -39,21 +39,21 @@ button.on{background:var(--acc);border-color:var(--acc);color:#fff}.save-btn{bor
 #aer{position:absolute;inset:0;overflow:hidden;display:none;background:#000;touch-action:none;cursor:grab}
 #aer img{position:absolute;left:0;top:0;transform-origin:0 0;user-select:none;-webkit-user-drag:none}
 .hide{display:none!important}
-@media(max-width:760px){html,body{height:auto;min-height:100%}body{min-height:100vh;overflow:auto}header{align-items:flex-start}header nav{width:100%}#stage{flex:none;height:58vh;min-height:240px}#toolbar-panels.open{grid-template-columns:minmax(0,1fr);max-height:78vh}#toolbar-panels .toolbar-card{max-height:35vh}}
+@media(max-width:760px){html,body{height:auto;min-height:100%}body{min-height:100vh;overflow:auto}header{align-items:flex-start}header nav{width:100%}#stage{flex:none;height:58vh;min-height:240px}#toolbar-panels.open{max-height:78vh}}
 </style></head><body>
 <header><h1>國立臺南特殊教育學校・互動式 3D 防災地圖</h1>
 <nav><button id="b-campus" class="on">校園</button><button id="b-bld">教學大樓 3D</button><button id="b-aer">空拍圖</button><button id="ctl-t" onclick="toggleCtl()">操作選項 ▸</button><button id="info-t" onclick="toggleInfo()">防救災資訊 ▸</button><button id="facility-t" onclick="toggleFacility()">設施定位 ▸</button><button id="save-pictures" class="save-btn" title="下載全部地圖底圖與目前 3D 畫面">⬇ 下載圖檔</button></nav></header>
 <div id="toolbar-panels" aria-label="操作選項、防救災資訊與設施定位"><div id="toolbar-drag-handle" aria-label="按住拖曳移動選項框">⠿　拖曳移動・右下角縮放<button id="toolbar-close" type="button" aria-label="關閉操作選項" title="關閉">×</button></div><div id="ctl-b" class="card toolbar-card hide">
 
-<div id="c-campus"><h3>校園 3D</h3><div class="mut">按住拖曳＝平移、滾輪或雙指縮放；按「拖曳」按鈕可切換旋轉。若要查看樓層，請點上方「教學大樓 3D」按鈕。</div>
-<div class="row"><button id="v-iso">斜視</button><button id="v-top">俯視</button><button class="pan">拖曳：平移</button></div>
+<div id="c-campus"><h3>校園 3D</h3><div class="mut">拖曳方式可分別選擇平移或旋轉；滾輪或雙指縮放。若要查看樓層，請點上方「教學大樓 3D」按鈕。</div>
+<div class="row"><button id="v-iso">斜視</button><button id="v-top">俯視</button><button class="mode-pan">拖曳：平移</button><button class="mode-rotate">拖曳：旋轉</button></div>
 <div class="row"><label class="mut"><input type="checkbox" id="k-wall" checked> 建築量體</label><label class="mut"><input type="checkbox" id="k-pin" checked> 設施標示</label><label class="mut"><input type="checkbox" id="k-roof" checked> 教學大樓屋頂</label><label class="mut"><input type="checkbox" id="k-walk" checked> 疏散人流（500人）</label></div></div>
 <div id="c-bld" class="hide"><h3>教學大樓 1F–3F</h3>
 <div class="row"><button data-f="all" class="on">整棟</button><button data-f="f3">3F</button><button data-f="f2">2F</button><button data-f="f1">1F</button></div>
 <div class="row mut">牆高 <input type="range" id="wh" min="1" max="4" step="0.1" value="2"></div>
 <div class="row mut">樓層分離 <input type="range" id="gap" min="0" max="8" step="0.1" value="0"></div>
 <div class="row"><label class="mut"><input type="checkbox" id="k-route" checked> 避難動線與10位循環行人</label><label class="mut"><input type="checkbox" id="k-tex" checked> 平面圖貼圖</label><label class="mut"><input type="checkbox" id="k-lab" checked> 房名</label></div>
-<div class="row"><button id="v2-iso">斜視</button><button id="v2-top">俯視</button><button id="v2-side">側視</button><button class="pan">拖曳：平移</button></div></div>
+<div class="row"><button id="v2-iso">斜視</button><button id="v2-top">俯視</button><button id="v2-side">側視</button><button class="mode-pan">拖曳：平移</button><button class="mode-rotate">拖曳：旋轉</button></div></div>
 <div id="c-aer" class="hide"><h3>空拍圖</h3><div class="mut">拖曳平移、滾輪或雙指縮放。</div><div class="row"><button id="z-in">放大</button><button id="z-out">縮小</button><button id="z-rst">還原</button></div></div>
 </div><div id="info-b" class="card toolbar-card hide">
 <h3>各類災害避難原則</h3>
@@ -91,8 +91,8 @@ const scene=new THREE.Scene();
 const cam=new THREE.PerspectiveCamera(42,1,.1,600);
 const ctl=new THREE.OrbitControls(cam,renderer.domElement);
 ctl.enableDamping=true;ctl.maxPolarAngle=Math.PI/2.02;
-let panMode=true;function setPan(p){panMode=p;ctl.mouseButtons.LEFT=p?THREE.MOUSE.PAN:THREE.MOUSE.ROTATE;ctl.mouseButtons.RIGHT=p?THREE.MOUSE.ROTATE:THREE.MOUSE.PAN;ctl.touches.ONE=p?THREE.TOUCH.PAN:THREE.TOUCH.ROTATE;document.querySelectorAll('.pan').forEach(b=>{b.textContent='拖曳：'+(p?'平移':'旋轉');b.classList.toggle('on',p)})}
-document.querySelectorAll('.pan').forEach(b=>b.onclick=()=>setPan(!panMode));setPan(true);
+let panMode=true;function setPan(p){panMode=p;ctl.mouseButtons.LEFT=p?THREE.MOUSE.PAN:THREE.MOUSE.ROTATE;ctl.mouseButtons.RIGHT=p?THREE.MOUSE.ROTATE:THREE.MOUSE.PAN;ctl.touches.ONE=p?THREE.TOUCH.PAN:THREE.TOUCH.ROTATE;document.querySelectorAll('.mode-pan').forEach(b=>b.classList.toggle('on',p));document.querySelectorAll('.mode-rotate').forEach(b=>b.classList.toggle('on',!p))}
+document.querySelectorAll('.mode-pan').forEach(b=>b.onclick=()=>setPan(true));document.querySelectorAll('.mode-rotate').forEach(b=>b.onclick=()=>setPan(false));setPan(true);
 scene.add(new THREE.HemisphereLight(0xffffff,0x8899aa,.95));
 const dl=new THREE.DirectionalLight(0xffffff,.7);dl.position.set(-20,40,25);scene.add(dl);
 function label(txt,sz=1.6,col='#1d2733',bg='rgba(255,255,255,.88)'){
