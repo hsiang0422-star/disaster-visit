@@ -278,7 +278,7 @@ $('#z-in').onclick=()=>zoomAt(1.3,av.clientWidth/2,av.clientHeight/2);$('#z-out'
 function resize(){const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();if(mode==='aer')resetAer()}
 new ResizeObserver(resize).observe(stage);
 const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
-function loop(){requestAnimationFrame(loop);const t=reduce?0:performance.now()/1000;ctl.update();
+function loop(){requestAnimationFrame(loop);const t=performance.now()/1000;ctl.update();
  if(mode==='campus'){rings.forEach((r,i)=>{const k=(t*.6+i*.2)%1;r.scale.setScalar(1+k*(r.userData.pinKey===selectedFacility?9:(r.userData.s||4)));r.material.opacity=.9*(1-k)});
   if(walkersLayer.visible)walkers.forEach(w=>{
    const elapsed=t-walkerClockOrigin-w.depart;
