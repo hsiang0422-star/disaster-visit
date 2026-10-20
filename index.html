@@ -46,8 +46,8 @@ h3{font-size:16px;margin:0 0 8px}
 .c1{background:var(--grn)}.c2{background:var(--amb)}.c3{background:var(--red)}
 .two{display:grid;gap:12px}@media(min-width:720px){.two{grid-template-columns:1fr 1fr}}
 .flow-pair,.map-pair{grid-template-columns:minmax(0,1fr)}
-.map-pair{align-items:stretch}.map-pair>.card{margin:0;min-width:0}.map-preview{display:block;width:100%;height:clamp(280px,32vw,430px);border:1px solid var(--line);border-radius:10px;background:var(--bg)}
-.steps{display:grid;gap:8px;margin:0;padding:0;list-style:none;counter-reset:s}
+.map-pair{grid-template-columns:minmax(0,1fr);align-items:stretch}.map-pair>.card{margin:0;min-width:0}.map-preview{display:block;width:100%;height:clamp(280px,32vw,430px);border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.steps{display:grid;gap:8px;margin:0;padding:0;list-style:none;counter-reset:s}@media(min-width:1100px){.steps{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:24px}}
 .steps li{counter-increment:s;padding-left:34px;position:relative;font-size:14.5px}
 .steps li::before{content:counter(s);position:absolute;left:0;top:1px;width:24px;height:24px;border-radius:50%;background:var(--amb);color:#fff;text-align:center;line-height:24px;font-size:13px;font-weight:700}
 .flow-steps{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 18px}.flow-steps li{padding:10px 12px 10px 44px;background:var(--bg);border:1px solid var(--line);border-radius:10px;line-height:1.55;min-height:48px}.flow-steps li::before{left:10px;top:10px}
@@ -72,6 +72,17 @@ h3{font-size:16px;margin:0 0 8px}
 .ramp-action{display:flex!important;flex-direction:column;justify-content:center;align-items:flex-start;gap:3px;min-height:72px;padding:12px 16px!important;border-radius:12px!important;text-decoration:none;font-size:17px!important;font-weight:700}
 .ramp-action small{font-size:13px;font-weight:400;line-height:1.5;opacity:.9}
 .ramp-action.primary{background:var(--amb);color:#fff}
+.ramp-progress-page{margin:18px 0 0;border:1px solid var(--line);border-radius:10px;background:#fff;overflow:hidden}
+.ramp-progress-page a{display:block}
+.ramp-progress-page img{display:block;width:100%;height:auto}
+.ramp-progress-page figcaption{padding:9px 12px;font-size:14px;color:var(--mute)}
+.ramp-latest-docs{margin:14px 0 0;padding:14px;border-radius:10px;background:#f2f5ec;border:1px solid var(--line)}
+.ramp-latest-docs>strong{display:block;margin-bottom:4px;color:var(--amb);font-size:16px}
+.ramp-latest-docs>p{margin:0 0 10px;font-size:13px;color:var(--mute)}
+.ramp-latest-links{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.ramp-latest-links a{display:block;padding:10px 12px;border-radius:8px;background:#fff;border:1px solid var(--line);color:var(--ink);font-size:14px;text-decoration:none}
+.ramp-latest-links a:hover{text-decoration:underline}
+@media(max-width:640px){.ramp-latest-links{grid-template-columns:1fr}}
 .ramp-action.secondary{background:var(--card);color:var(--amb);border:1px solid var(--amb)}
 @media(min-width:640px){.ramp-actions{grid-template-columns:1fr 1fr}}
 
@@ -174,7 +185,6 @@ footer{margin-top:30px;font-size:12.5px;color:var(--mute);text-align:center}
 
 <h2 id="s3"><b>參</b>逃生路線</h2>
 <div class="sc"><b>演練情境</b>　上課時地震發生，花蓮外海規模 <b>6.8</b>，本校最大震度 <b>5</b> 級，搖晃約 <b>40</b> 秒。<br>狀況演練：教學大樓 1F 景觀電梯旁樓梯口有學生被玻璃割傷左手，血流不止，需緊急救治。</div>
-<div class="two flow-pair">
 <div class="card flow-card"><h3>演練流程</h3><ol class="steps flow-steps">
 <li><b>室內（各班）</b>：老師聽到警報立即帶學生趴、掩、穩，採低姿勢，老師自己也做動作</li>
 <li><b>指揮官</b>用對講機請學務處廣播，緊急應變小組攜帶物品到健康中心前廣場集合</li>
@@ -182,7 +192,6 @@ footer{margin-top:30px;font-size:12.5px;color:var(--mute);text-align:center}
 <li>指揮官接獲安全回報，請學務處<b>全校廣播</b>疏散</li>
 <li>疏散後清點教職員工與學生人數，確認全校人員已安全撤離</li>
 </ol></div>
-</div>
 <h3 id="script" style="font-size:19px;margin:24px 0 8px">演練腳本（時間軸）</h3>
 <div class="card"><h3>演練設定</h3><div class="k5">
 <div><b>設定時間</b>　115年9月21日（星期一） 09:21時至10:01時</div><div><b>天氣</b>　晴天</div><div><b>演練災害</b>　地震</div><div style="grid-column:1/-1"><b>演練情境</b>　上課時地震發生，花蓮外海發生規模6.8地震，同時地震速報響起，本校所在地區最大震度達 5 級，地震持續搖晃時間約 40 秒鐘。</div>
@@ -228,12 +237,11 @@ footer{margin-top:30px;font-size:12.5px;color:var(--mute);text-align:center}
 </tbody></table></div></div>
 <div class="card ramp-card">
 <div class="ramp-card-head"><span class="ramp-label">工程資訊</span><h3>113年無障礙斜坡道工程</h3></div>
-<p>工程進度、變更設計資料及相關文件可於下列連結查閱。</p>
+<p>工程進度與變更設計資料可於工程專頁查閱；115年9月24日討論內容請開啟會議紀錄。</p>
 <div class="ramp-actions">
-<a class="ramp-action primary" href="https://hsiang0422-star.github.io/accessibility-ramp-progress/" target="_blank" rel="noopener"><span>查看工程進度</span><small>工程現況、進度說明與變更設計資料　↗</small></a>
+<a class="ramp-action primary" href="https://accessibility-ramp-progress.c-h-hsiang0422.chatgpt.site/" target="_blank" rel="noopener"><span>查看工程進度</span><small>最新工程現況、文件與完整進度表　↗</small></a>
 <a class="ramp-action secondary" href="https://drive.google.com/file/d/1a0zfMh0_qYBGIR5_DNUDZTz0IlUB2r6q/view" target="_blank" rel="noopener"><span>閱讀會議紀錄（PDF）</span><small>115年9月24日｜無障礙斜坡工程變更設計討論　↗</small></a>
-<a class="ramp-action secondary" href="https://drive.google.com/file/d/10l7Bw8ZU_t-KVLd3E5H_3M0-W6MoU7DC/view" target="_blank" rel="noopener"><span>開啟細部設計圖說（PDF）</span><small>1020版｜A3 細部設計　↗</small></a>
-<a class="ramp-action secondary" href="https://drive.google.com/file/d/1BGC8xWKvZiKzcpPEYIw7a5g7b6EvYlw0/view" target="_blank" rel="noopener"><span>開啟變更 RC 概算（PDF）</span><small>1019版｜概估資料，金額及工期依核定圖說與約定核算　↗</small></a><a class="ramp-action secondary" href="./documents/engineering-progress-chart-1020.pdf" target="_blank" rel="noopener"><span>開啟工程進度圖（PDF）</span><small>1020 變更版｜無障礙逃生坡道相關期程　↗</small></a></div></div>
+</div><div class="ramp-latest-docs"><strong>最新文件｜115年10月20日</strong><p>委員可直接開啟檢視或下載工程文件：</p><div class="ramp-latest-links"><a href="https://accessibility-ramp-progress.c-h-hsiang0422.chatgpt.site/documents/ramp-estimate-1019.pdf" target="_blank" rel="noopener">變更 RC 經費概算表 ↗</a><a href="https://accessibility-ramp-progress.c-h-hsiang0422.chatgpt.site/documents/ramp-design-1020.pdf" target="_blank" rel="noopener">A3 細部設計圖 ↗</a><a href="https://accessibility-ramp-progress.c-h-hsiang0422.chatgpt.site/documents/ramp-progress-chart-1020.pdf" target="_blank" rel="noopener">工程進度表 PDF ↗</a></div></div><figure class="ramp-progress-page"><a href="https://tnmr-115-disaster-visit.c-h-hsiang0422.chatgpt.site/assets/113%E5%B9%B4%E7%84%A1%E9%9A%9C%E7%A4%99%E6%96%9C%E5%9D%A1%E9%81%93%E5%B7%A5%E7%A8%8B%E5%B7%A5%E4%BD%9C%E9%80%B2%E5%BA%A6%E8%A1%A8%E5%AE%8C%E6%95%B4%E9%A0%81%E9%9D%A2-1.png" target="_blank" rel="noopener" aria-label="另開完整頁面檢視工作進度表"><img src="https://tnmr-115-disaster-visit.c-h-hsiang0422.chatgpt.site/assets/113%E5%B9%B4%E7%84%A1%E9%9A%9C%E7%A4%99%E6%96%9C%E5%9D%A1%E9%81%93%E5%B7%A5%E7%A8%8B%E5%B7%A5%E4%BD%9C%E9%80%B2%E5%BA%A6%E8%A1%A8%E5%AE%8C%E6%95%B4%E9%A0%81%E9%9D%A2-1.png" alt="國立臺南特殊教育學校無障礙逃生斜坡道工程委託設計監造案工作進度表，完整 A4 橫式頁面"></a><figcaption>工作進度表｜完整頁面（點擊可放大檢視）</figcaption></figure></div>
 
 <h2 id="s5"><b>伍</b>原始文件</h2>
 <div class="card"><p class="note" style="margin:0 0 10px">委員如需查閱原始資料，可點選下列文件。</p>
