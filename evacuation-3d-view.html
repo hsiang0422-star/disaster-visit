@@ -8,7 +8,7 @@
 html,body{height:100%;margin:0}
 body{background:var(--bg);color:var(--fg);font:14px/1.5 "Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;display:flex;flex-direction:column;overflow:hidden}
 header{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;padding:8px 12px;background:var(--panel);border-bottom:1px solid var(--line)}
-h1{font-size:16px;margin:0}
+h1{font-size:16px;margin:0}h1 .ctlhint{display:inline-block;margin-left:10px;font-size:12px;font-weight:400;opacity:.7}
 nav{display:flex;flex-wrap:wrap;gap:6px}
 #ctl-t,#info-t{white-space:nowrap}
 #toolbar-panels{display:none;padding:34px 10px 10px}
@@ -52,11 +52,11 @@ button.on{background:var(--acc);border-color:var(--acc);color:#fff}.save-btn{bor
 .pindraft{background:#fff4d6;border:1px solid #e0c66a;border-radius:6px;padding:6px 8px;margin:6px 0;font-size:12px}
 #pinOutTx{width:100%;height:110px;font-size:11px;box-sizing:border-box;margin-top:4px}
 </style></head><body>
-<header><h1>國立臺南特殊教育學校・互動式 3D 防災地圖</h1>
+<header><h1>國立臺南特殊教育學校・互動式 3D 防災地圖<small class="ctlhint">拖曳旋轉・Shift＋拖曳平移・滾輪縮放・雙指可平移</small></h1>
 <nav><button id="b-campus" class="on">校園</button><button id="b-bld">教學大樓 3D</button><button id="b-aer">空拍圖</button><button id="ctl-t" onclick="toggleCtl()">操作選項 ▸</button><button id="info-t" onclick="toggleInfo()">防救災資訊 ▸</button><button id="facility-t" onclick="toggleFacility()">設施定位 ▸</button><button id="edit-t" title="僅編輯者可用">設施編輯 ▸</button><button id="save-pictures" class="save-btn" title="下載全部地圖底圖與目前 3D 畫面">⬇ 下載圖檔</button></nav></header>
 <div id="toolbar-panels" aria-label="操作選項、防救災資訊與設施定位"><div id="toolbar-drag-handle" aria-label="按住拖曳移動選項框">⠿　<span class="toolbar-hint">拖曳移動・調整大小</span><button id="toolbar-close" type="button" aria-label="關閉操作選項" title="關閉">×</button></div><div id="ctl-b" class="card toolbar-card hide">
 
-<div id="c-campus"><h3>校園 3D</h3><div class="mut">拖曳方式可分別選擇平移或旋轉；滾輪或雙指縮放。若要查看樓層，請點上方「教學大樓 3D」按鈕。</div>
+<div id="c-campus"><h3>校園 3D</h3><div class="mut">拖曳旋轉・Shift＋拖曳平移・滾輪縮放・雙指可平移（也可用下方按鈕把拖曳切換成平移）。若要查看樓層，請點上方「教學大樓 3D」按鈕。</div>
 <div class="row"><button id="v-iso">斜視</button><button id="v-top">俯視</button><button class="mode-pan">拖曳：平移</button><button class="mode-rotate">拖曳：旋轉</button></div>
 <div class="row"><label class="mut"><input type="checkbox" id="k-wall" checked> 建築量體</label><label class="mut"><input type="checkbox" id="k-pin" checked> 設施標示</label><label class="mut"><input type="checkbox" id="k-roof" checked> 教學大樓屋頂</label><label class="mut"><input type="checkbox" id="k-walk" checked> 疏散人流（200人）</label></div></div>
 <div id="c-bld" class="hide"><h3>教學大樓 1F–3F</h3>
@@ -121,8 +121,8 @@ const scene=new THREE.Scene();
 const cam=new THREE.PerspectiveCamera(42,1,.1,600);
 const ctl=new THREE.OrbitControls(cam,renderer.domElement);
 ctl.enableDamping=true;ctl.maxPolarAngle=Math.PI/2.02;
-let panMode=true;function setPan(p){panMode=p;ctl.mouseButtons.LEFT=p?THREE.MOUSE.PAN:THREE.MOUSE.ROTATE;ctl.mouseButtons.RIGHT=p?THREE.MOUSE.ROTATE:THREE.MOUSE.PAN;ctl.touches.ONE=p?THREE.TOUCH.PAN:THREE.TOUCH.ROTATE;document.querySelectorAll('.mode-pan').forEach(b=>b.classList.toggle('on',p));document.querySelectorAll('.mode-rotate').forEach(b=>b.classList.toggle('on',!p))}
-document.querySelectorAll('.mode-pan').forEach(b=>b.onclick=()=>setPan(true));document.querySelectorAll('.mode-rotate').forEach(b=>b.onclick=()=>setPan(false));setPan(true);
+let panMode=true;function setPan(p){panMode=p;ctl.mouseButtons.LEFT=p?THREE.MOUSE.PAN:THREE.MOUSE.ROTATE;ctl.mouseButtons.RIGHT=p?THREE.MOUSE.ROTATE:THREE.MOUSE.PAN;ctl.touches.ONE=p?THREE.TOUCH.PAN:THREE.TOUCH.ROTATE;ctl.touches.TWO=THREE.TOUCH.DOLLY_PAN;document.querySelectorAll('.mode-pan').forEach(b=>b.classList.toggle('on',p));document.querySelectorAll('.mode-rotate').forEach(b=>b.classList.toggle('on',!p))}
+document.querySelectorAll('.mode-pan').forEach(b=>b.onclick=()=>setPan(true));document.querySelectorAll('.mode-rotate').forEach(b=>b.onclick=()=>setPan(false));ctl.screenSpacePanning=true;setPan(false);
 scene.add(new THREE.HemisphereLight(0xffffff,0x8899aa,.95));
 const dl=new THREE.DirectionalLight(0xffffff,.7);dl.position.set(-20,40,25);scene.add(dl);
 function label(txt,sz=1.6,col='#1d2733',bg='rgba(255,255,255,.88)'){
