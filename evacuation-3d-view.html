@@ -86,6 +86,11 @@ button.on{background:var(--acc);border-color:var(--acc);color:#fff}.save-btn{bor
 <div class="row"><button id="pinDel" disabled>刪除選取的設施</button></div>
 <h4>新增設施</h4><p class="mut">新增後會出現在畫面中央，再拖到正確位置。</p>
 <div class="row"><input id="pinNewName" placeholder="設施名稱（未填則為「新設施」）" style="flex:1"><button id="pinAdd">＋ 新增設施</button></div>
+<h4>疏散路線（戶外，紅線）</h4><p class="mut">點一下紅線即可選取；拖曳控制點可改變路線；選取控制點後可加點或刪除。</p>
+<p id="evSel" class="mut">尚未選取，點一下紅線即可選取。</p>
+<div class="row"><button id="evAddPt" disabled>＋ 在選取點後加點</button><button id="evDelPt" disabled>刪除選取的點</button></div>
+<div class="row"><button id="evRev" disabled>反轉方向</button><button id="evDel" disabled>刪除這條路線</button></div>
+<div class="row"><button id="evNew">＋ 新增路線</button></div>
 <div class="row"><button id="pinDone">完成並產生文字</button><button id="pinReset">全部還原成原始位置</button></div>
 <div id="pinOutBox" hidden><p class="mut">請把下面整段文字複製後貼給 Claude，我會更新到 GitHub。</p><textarea id="pinOutTx" readonly></textarea><div class="row"><button id="pinCopy">複製文字</button><span id="pinCopied" class="mut" hidden>已複製</span></div></div>
 </div>
@@ -136,8 +141,8 @@ const fx=(f,px)=>(f.s*px+f.tx-W1/2)*S,fz=(f,py)=>(f.s*py+f.ty-H1/2)*S;
 function addAEDMarker(group,f,x,y){const px=fx(f,x),pz=fz(f,y),ring=new THREE.Mesh(new THREE.RingGeometry(.42,.58,32),new THREE.MeshBasicMaterial({color:0xffc928,side:THREE.DoubleSide,depthTest:false}));ring.rotation.x=-Math.PI/2;ring.position.set(px,.08,pz);ring.renderOrder=8;group.add(ring);const pin=label('AED',1.25,'#fff','#c62828');pin.position.set(px,.13,pz);group.add(pin)}
 const BLD=[[70,100,140,155,3,'校舍'],[245,95,115,110,3,'校舍'],[370,95,115,110,3,'校舍'],[500,100,290,115,3,'教學大樓（示意位置）','tb'],[695,215,135,105,3,'教學大樓（示意位置）','tb'],[685,320,145,280,3,'教學大樓（示意位置）','tb'],[840,160,100,140,2,'禮堂']];
 let PINS=[[350,330,'指揮中心','command'],[350,415,'防災倉庫','warehouse'],[480,380,'最終集合地點','assembly'],[545,343,'急救站','firstaid'],[980,317,'警衛室','guard'],[825,45,'交流門','gate'],[397,328,'室外避難處','outdoor'],[660,190,'健康中心','health'],[765,124,'AED','aed-1f'],[761,167,'AED','aed-3f'],[140,180,'AED','aed-dorm'],[907,273,'通訊設備放置點','comms'],[905,285,'救援器材放置點','rescue'],[950,342,'災時家長接送區','pickup']];
-const ORIG_PINS=JSON.parse(JSON.stringify(PINS));let editOn=false,selPin=-1,pinDrag=null,addArmed=false;const pinHits=[],undoStack=[];try{if(localStorage.getItem('campus3d-acc-editor')==='428e9f391aa4c2e0cfd74000b8957e0a05c8fc17dd95d4b060a87d7c6b4bd7c8'){const d=JSON.parse(localStorage.getItem('disaster-pins-draft')||'null');if(Array.isArray(d))PINS=d;}}catch(e){}
-const evacuationPaths=[
+const ORIG_PINS=JSON.parse(JSON.stringify(PINS));let editOn=false,selPin=-1,pinDrag=null,addArmed=false;const pinHits=[],undoStack=[];try{if(localStorage.getItem('campus3d-acc-editor')==='428e9f391aa4c2e0cfd74000b8957e0a05c8fc17dd95d4b060a87d7c6b4bd7c8'){const d=JSON.parse(localStorage.getItem('disaster-pins-draft')||'null');if(Array.isArray(d))PINS=d;else if(d&&Array.isArray(d.pins))PINS=d.pins;}}catch(e){}
+let evacuationPaths=[
  // 教學大樓西側紅色箭頭：沿箭頭向西南匯流，最後抵達校園圖上的最終集合點標記。
  [[1385,465],[1370,490],[1348,520],[1300,560],[1250,630],[1195,735],[1100,750],[1030,755],[960,760]],
  [[1390,545],[1355,550],[1310,585],[1255,650],[1195,735],[1100,750],[1030,755],[960,760]],
@@ -263,7 +268,7 @@ function layout(){const h=mode==='campus'?cWh:wh,e=mode==='campus'?0:extra,isola
   o.labs.visible=mode==='bld'&&on&&$('#k-lab').checked;o.aedMarks.visible=mode==='bld'&&on;o.labs.children.forEach(l=>l.position.y=h+.9);o.floorTag.visible=mode==='bld'||mode==='campus';o.floorTag.children.forEach(l=>l.position.y=h+.9);if(o.floorWalkers)o.floorWalkers.visible=mode==='bld'&&on&&routesOn});if(roof){roof.position.y=(FL[2]?.g.position.y||0)+h;roof.visible=mode==='campus'&&$('#k-roof').checked&&walls.visible}}
 function drawRoutes(o,t){const c=o.ctx,f=o.f;c.setLineDash([]);c.clearRect(0,0,f.W,f.H);
  if(routesOn&&o.op>.5){c.lineCap='round';c.lineJoin='round';
-  o.paths.forEach(p=>{c.setLineDash([]);c.strokeStyle='rgba(214,40,32,.22)';c.lineWidth=11;c.stroke(p);c.strokeStyle='#d62820';c.lineWidth=5.5;c.setLineDash([16,11]);c.lineDashOffset=-t*26;c.stroke(p)});
+  o.paths.forEach(p=>{c.setLineDash([]);c.strokeStyle='rgba(31,111,235,.22)';c.lineWidth=11;c.stroke(p);c.strokeStyle='#1f6feb';c.lineWidth=5.5;c.setLineDash([16,11]);c.lineDashOffset=-t*26;c.stroke(p)});
   if(f.blink){const a=.2+.8*(.5+.5*Math.sin(t*6));c.globalAlpha=a;c.setLineDash([10,6]);c.strokeStyle='#c2281f';c.lineWidth=5;c.strokeRect(...f.blink);c.globalAlpha=1;c.setLineDash([])}}
  o.rt.needsUpdate=true}
 function updateFloorBadge(){const labels={all:'整棟',f1:'1F',f2:'2F',f3:'3F'};$('#floor-badge').textContent='教學大樓｜'+(labels[focus]||'整棟')+' 樓層圖'}
@@ -346,38 +351,98 @@ async function saveMapImages(){const btn=$('#save-pictures'),old=btn.textContent
  const url=URL.createObjectURL(imageZip(files)),a=document.createElement('a');a.href=url;a.download='國立臺南特教學校_互動式3D地圖圖檔.zip';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000)
  }catch(e){alert('圖檔整理失敗，請重新載入頁面後再試。')}finally{btn.disabled=false;btn.textContent=old}}
 $('#save-pictures').onclick=saveMapImages;
-/* ── 設施編輯（與校園地圖的編輯模式相同：選取、拖曳、新增、刪除、Ctrl+Z、草稿、完成並產生文字）── */
+/* ── 設施與戶外疏散路線編輯（與校園地圖的編輯模式相同）── */
 const EDITOR_KEY='campus3d-acc-editor',EDITOR_HASH='428e9f391aa4c2e0cfd74000b8957e0a05c8fc17dd95d4b060a87d7c6b4bd7c8',DRAFT_KEY='disaster-pins-draft';
 const isEditor=()=>{try{return localStorage.getItem(EDITOR_KEY)===EDITOR_HASH}catch(e){return false}};
 const sha=async t=>{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')};
 const clampI=(v,lo,hi)=>Math.round(Math.min(hi,Math.max(lo,v)));
-const snap=()=>JSON.stringify(PINS);
-const isDirty=()=>snap()!==JSON.stringify(ORIG_PINS);
+const ORIG_EVAC=JSON.parse(JSON.stringify(evacuationPaths));
+try{if(isEditor()){const d=JSON.parse(localStorage.getItem(DRAFT_KEY)||'null');if(d&&Array.isArray(d.evac))evacuationPaths=d.evac}}catch(e){}
+let selRoute=-1,selPt=-1,evDrag=null;
+const evGroup=new THREE.Group();scene.add(evGroup);const evHandles=[],evTubes=[];
+const snapState=()=>JSON.stringify({pins:PINS,evac:evacuationPaths});
+const isDirty=()=>snapState()!==JSON.stringify({pins:ORIG_PINS,evac:ORIG_EVAC});
+const restoreState=s=>{const o=JSON.parse(s);PINS=o.pins;evacuationPaths=o.evac};
 function pushUndo(s){undoStack.push(s);if(undoStack.length>200)undoStack.shift()}
-function saveDraft(){try{if(isDirty())localStorage.setItem(DRAFT_KEY,snap());else localStorage.removeItem(DRAFT_KEY)}catch(e){}}
-function refreshPinPanel(){const sel=selPin>=0&&PINS[selPin];$('#pinSel').textContent=sel?sel[2]+'（第 '+(selPin+1)+' 個，可拖曳移動）':'尚未選取，點一下圖示即可選取。';$('#pinDel').disabled=!sel;$('#pinDraft').hidden=!isDirty()}
-function commit(before){if(before!==undefined)pushUndo(before);saveDraft();buildPins();refreshPinPanel()}
-function undoPins(){const s=undoStack.pop();if(s===undefined)return;PINS=JSON.parse(s);if(selPin>=PINS.length)selPin=-1;saveDraft();buildPins();refreshPinPanel()}
+function saveDraft(){try{if(isDirty())localStorage.setItem(DRAFT_KEY,snapState());else localStorage.removeItem(DRAFT_KEY)}catch(e){}}
+function refreshPinPanel(){
+  const sel=selPin>=0&&PINS[selPin];
+  $('#pinSel').textContent=sel?sel[2]+'（第 '+(selPin+1)+' 個，可拖曳移動）':'尚未選取，點一下圖示即可選取。';
+  $('#pinDel').disabled=!sel;
+  const rt=selRoute>=0?evacuationPaths[selRoute]:null;
+  $('#evSel').textContent=rt?'紅線 '+(selRoute+1)+'（共 '+rt.length+' 個控制點）'+(selPt>=0?'，已選第 '+(selPt+1)+' 點':'，點控制點可選取'):'尚未選取，點一下紅線即可選取。';
+  $('#evAddPt').disabled=!(rt&&selPt>=0);$('#evDelPt').disabled=!(rt&&selPt>=0&&rt.length>2);
+  $('#evRev').disabled=!rt;$('#evDel').disabled=!rt;
+  $('#pinDraft').hidden=!isDirty();
+}
+function rebuildWalkers(){walkersLayer.children.slice().forEach(c=>walkersLayer.remove(c));walkers.length=0;initWalkers()}
+function commit(before){
+  const old=before!==undefined?JSON.parse(before):null;
+  if(before!==undefined)pushUndo(before);
+  saveDraft();buildPins();buildEvac();
+  if(old&&JSON.stringify(old.evac)!==JSON.stringify(evacuationPaths))rebuildWalkers();
+  refreshPinPanel();
+}
+function undoPins(){
+  const s=undoStack.pop();if(s===undefined)return;
+  const cur=JSON.parse(snapState());restoreState(s);
+  if(selPin>=PINS.length)selPin=-1;
+  if(selRoute>=evacuationPaths.length)selRoute=-1;
+  if(selRoute<0||selPt>=evacuationPaths[selRoute].length)selPt=-1;
+  saveDraft();buildPins();buildEvac();
+  if(JSON.stringify(cur.evac)!==JSON.stringify(evacuationPaths))rebuildWalkers();
+  refreshPinPanel();
+}
+function buildEvac(){
+  while(evGroup.children.length)evGroup.remove(evGroup.children[0]);
+  evHandles.length=0;evTubes.length=0;
+  if(!editOn)return;
+  evacuationPaths.forEach((pts,r)=>{
+    const v=pts.map(([x,y])=>{const[wx,wz]=g2w(x/2,y/2);return new THREE.Vector3(wx,0.12,wz)});
+    const curve=new THREE.CatmullRomCurve3(v,false,'centripetal');
+    const line=new THREE.Line(new THREE.BufferGeometry().setFromPoints(curve.getPoints(160)),new THREE.LineBasicMaterial({color:0xd62820}));
+    line.renderOrder=12;evGroup.add(line);
+    const tube=new THREE.Mesh(new THREE.TubeGeometry(curve,160,.7,6,false),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));
+    tube.userData={evRoute:r};evGroup.add(tube);evTubes.push(tube);
+    const e=v[v.length-1],p=v[v.length-2],dir=e.clone().sub(p);dir.y=0;
+    if(dir.lengthSq()>0){const cone=new THREE.Mesh(new THREE.ConeGeometry(.45,1.1,10),new THREE.MeshBasicMaterial({color:0xd62820}));
+      cone.position.set(e.x,.6,e.z);cone.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir.normalize());cone.renderOrder=13;evGroup.add(cone)}
+    if(r===selRoute)v.forEach((pt,i)=>{const h=new THREE.Mesh(new THREE.SphereGeometry(.5,12,10),new THREE.MeshBasicMaterial({color:i===selPt?0xff8a00:0xd62820}));
+      h.position.set(pt.x,.3,pt.z);h.renderOrder=14;h.userData={evRoute:r,evPt:i};evGroup.add(h);evHandles.push(h)});
+  });
+}
 const plane=new THREE.Plane(new THREE.Vector3(0,1,0),0),gp=new THREE.Vector3();
-function setPointer(e){const r=renderer.domElement.getBoundingClientRect();mp.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);ray.setFromCamera(mp,cam)}
+function setPointer(e){const r=renderer.domElement.getBoundingClientRect();mp.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);pins.updateMatrixWorld(true);evGroup.updateMatrixWorld(true);ray.setFromCamera(mp,cam)}
 function toMap(v){return{gx:clampI((v.x/CW+.5)*1070,0,2140),gy:clampI((v.z/CH+.5)*691,0,1382)}}
 function groundAt(e){setPointer(e);return ray.ray.intersectPlane(plane,gp)?toMap(gp):null}
 function centerGround(){mp.set(0,0);ray.setFromCamera(mp,cam);return ray.ray.intersectPlane(plane,gp)?toMap(gp):{gx:1070,gy:691}}
 function pickPin(e){setPointer(e);return ray.intersectObjects(pinHits,false)[0]}
+function pickEv(e){setPointer(e);const h=ray.intersectObjects(evHandles,false)[0];if(h)return{kind:'pt',evRoute:h.object.userData.evRoute,evPt:h.object.userData.evPt};
+  const t=ray.intersectObjects(evTubes,false)[0];return t?{kind:'route',evRoute:t.object.userData.evRoute}:null}
 window.addEventListener('pointerdown',e=>{
   if(!editOn||mode!=='campus'||e.button!==0||e.target!==renderer.domElement)return;
-  const h=pickPin(e);if(!h)return;
-  e.stopPropagation();const idx=h.object.userData.idx;selPin=idx;pinDrag={idx,start:snap(),moved:false};ctl.enabled=false;buildPins();refreshPinPanel();
+  const hp=pickPin(e);
+  if(hp){e.stopPropagation();selRoute=-1;selPt=-1;selPin=hp.object.userData.idx;pinDrag={idx:selPin,start:snapState(),moved:false};ctl.enabled=false;buildPins();buildEvac();refreshPinPanel();return}
+  const he=pickEv(e);
+  if(he){e.stopPropagation();selPin=-1;selRoute=he.evRoute;selPt=-1;
+    if(he.kind==='pt'){selPt=he.evPt;evDrag={r:he.evRoute,i:he.evPt,start:snapState(),moved:false};ctl.enabled=false}
+    buildPins();buildEvac();refreshPinPanel()}
 },true);
-window.addEventListener('pointermove',e=>{if(!pinDrag)return;const g=groundAt(e);if(!g)return;PINS[pinDrag.idx][0]=g.gx;PINS[pinDrag.idx][1]=g.gy;pinDrag.moved=true;buildPins()});
-const endDrag=()=>{if(!pinDrag)return;ctl.enabled=true;const d=pinDrag;pinDrag=null;if(d.moved)commit(d.start)};
+window.addEventListener('pointermove',e=>{
+  if(pinDrag){const g=groundAt(e);if(!g)return;PINS[pinDrag.idx][0]=g.gx;PINS[pinDrag.idx][1]=g.gy;pinDrag.moved=true;buildPins();return}
+  if(evDrag){const g=groundAt(e);if(!g)return;evacuationPaths[evDrag.r][evDrag.i]=[2*g.gx,2*g.gy];evDrag.moved=true;buildEvac()}
+});
+const endDrag=()=>{ctl.enabled=true;
+  if(pinDrag){const d=pinDrag;pinDrag=null;if(d.moved)commit(d.start)}
+  if(evDrag){const d=evDrag;evDrag=null;if(d.moved)commit(d.start)}};
 window.addEventListener('pointerup',endDrag);window.addEventListener('pointercancel',endDrag);
-function deleteSel(){if(selPin<0)return;const before=snap();PINS.splice(selPin,1);selPin=-1;commit(before)}
+function deleteSel(){if(selPin<0)return;const before=snapState();PINS.splice(selPin,1);selPin=-1;commit(before)}
+function delRoutePt(){const rt=evacuationPaths[selRoute];if(!rt||selPt<0||rt.length<=2)return;const before=snapState();rt.splice(selPt,1);selPt=-1;commit(before)}
 window.addEventListener('keydown',e=>{
   if(!editOn||/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))return;
   if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&e.key.toLowerCase()==='z'){e.preventDefault();undoPins();return}
-  if((e.key==='Backspace'||e.key==='Delete')&&selPin>=0){e.preventDefault();deleteSel()}});
-function setEditOn(on){editOn=on;$('#pin-edit').classList.toggle('hide',!on);$('#edit-t').textContent='設施編輯'+(on?' ▾':' ▸');if(on&&mode!=='campus')setMode('campus');if(!on){selPin=-1;buildPins()}refreshPinPanel()}
+  if(e.key==='Backspace'||e.key==='Delete'){if(selRoute>=0&&selPt>=0){e.preventDefault();delRoutePt()}else if(selPin>=0){e.preventDefault();deleteSel()}}});
+function setEditOn(on){editOn=on;$('#pin-edit').classList.toggle('hide',!on);$('#edit-t').textContent='設施編輯'+(on?' ▾':' ▸');if(on&&mode!=='campus')setMode('campus');if(!on){selPin=-1;selRoute=-1;selPt=-1}buildPins();buildEvac();refreshPinPanel()}
 function openGate(){$('#pin-gate').classList.remove('hide');$('#gate-pw').value='';$('#gate-msg').textContent='';$('#gate-pw').focus()}
 $('#edit-t').onclick=()=>{if(!isEditor()){openGate();return}setEditOn(!editOn)};
 $('#gate-close').onclick=()=>$('#pin-gate').classList.add('hide');
@@ -387,12 +452,20 @@ $('#gate-go').onclick=async()=>{let h='';try{h=await sha('campus3d-acc:'+$('#gat
   if(h!==EDITOR_HASH){$('#gate-msg').textContent='密碼不正確，請再試一次。';$('#gate-pw').select();return}
   try{localStorage.setItem(EDITOR_KEY,EDITOR_HASH)}catch(e){}$('#pin-gate').classList.add('hide');setEditOn(true)};
 $('#pin-close').onclick=()=>setEditOn(false);
-$('#pinAdd').onclick=()=>{const before=snap();const g=centerGround();const nm=$('#pinNewName').value.trim()||'新設施';PINS.push([g.gx,g.gy,nm,'custom-'+Date.now().toString(36)]);selPin=PINS.length-1;$('#pinNewName').value='';commit(before)};
+$('#pinAdd').onclick=()=>{const before=snapState();const g=centerGround();const nm=$('#pinNewName').value.trim()||'新設施';PINS.push([g.gx,g.gy,nm,'custom-'+Date.now().toString(36)]);selPin=PINS.length-1;$('#pinNewName').value='';commit(before)};
 $('#pinDel').onclick=deleteSel;
-function resetAll(){const before=snap();PINS=JSON.parse(JSON.stringify(ORIG_PINS));selPin=-1;commit(before)}
+$('#evAddPt').onclick=()=>{const rt=evacuationPaths[selRoute];if(!rt||selPt<0)return;const before=snapState();
+  const a=rt[selPt],b=rt[selPt+1]||null,c=rt[selPt-1]||null;
+  const np=b?[(a[0]+b[0])/2,(a[1]+b[1])/2]:(c?[2*a[0]-c[0],2*a[1]-c[1]]:[a[0]+40,a[1]]);
+  rt.splice(selPt+1,0,np);selPt=selPt+1;commit(before)};
+$('#evDelPt').onclick=delRoutePt;
+$('#evRev').onclick=()=>{const rt=evacuationPaths[selRoute];if(!rt)return;const before=snapState();rt.reverse();selPt=-1;commit(before)};
+$('#evDel').onclick=()=>{if(!evacuationPaths[selRoute])return;const before=snapState();evacuationPaths.splice(selRoute,1);selRoute=-1;selPt=-1;commit(before)};
+$('#evNew').onclick=()=>{const before=snapState();const g=centerGround();evacuationPaths.push([[2*g.gx,2*g.gy],[2*g.gx+60,2*g.gy]]);selRoute=evacuationPaths.length-1;selPt=-1;commit(before)};
+function resetAll(){const before=snapState();restoreState(JSON.stringify({pins:ORIG_PINS,evac:ORIG_EVAC}));selPin=-1;selRoute=-1;selPt=-1;commit(before)}
 $('#pinReset').onclick=()=>{if(confirm('全部還原成原始位置？（可用 Ctrl＋Z 復原）'))resetAll()};
 $('#pinDiscard').onclick=()=>{if(confirm('捨棄這台裝置尚未送出的調整，回到原始位置？'))resetAll()};
-$('#pinDone').onclick=()=>{const t=$('#pinOutTx');t.value='【防災地圖設施位置調整】\n共 '+PINS.length+' 個設施（x, y, 名稱, 代號）\n'+JSON.stringify(PINS)+'\n';$('#pinOutBox').hidden=false;t.focus();t.select()};
+$('#pinDone').onclick=()=>{const t=$('#pinOutTx');t.value='【防災地圖設施與疏散路線位置調整】\n設施 '+PINS.length+' 個（x, y, 名稱, 代號）\n'+JSON.stringify(PINS)+'\n戶外疏散路線（紅線）'+evacuationPaths.length+' 條（x, y 座標，與程式碼 evacuationPaths 相同格式）\n'+JSON.stringify(evacuationPaths)+'\n';$('#pinOutBox').hidden=false;t.focus();t.select()};
 $('#pinCopy').onclick=()=>{const t=$('#pinOutTx'),ok=()=>{const c=$('#pinCopied');c.hidden=false;setTimeout(()=>c.hidden=true,1800)},fb=()=>{t.select();try{document.execCommand('copy')}catch(e){}ok()};
   if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t.value).then(ok,fb);else fb()};
 (()=>{const h=$('#pinHead'),p=$('#pin-edit');let d=null;
