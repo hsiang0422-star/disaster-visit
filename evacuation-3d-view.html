@@ -47,6 +47,10 @@ button.on{background:var(--acc);border-color:var(--acc);color:#fff}.save-btn{bor
 #pin-edit.hide,#pin-gate.hide{display:none}#pin-edit input,#pin-edit select,#pin-gate input{font:inherit;font-size:12px;padding:3px 6px;border:1px solid var(--line);border-radius:5px;box-sizing:border-box}
 #pin-edit .x,#pin-gate .x{position:absolute;right:6px;top:4px;border:0;background:none;font-size:16px;padding:0 4px}
 #pin-edit button.on{background:var(--acc);color:#fff}
+#pin-edit .pinhead{display:flex;align-items:center;gap:6px;cursor:move;font-weight:600;margin-bottom:4px;user-select:none}#pin-edit .pinhead .x{position:static;margin-left:auto}
+#pin-edit h4{margin:10px 0 4px;font-size:13px}#pin-edit .mut{font-size:12px;margin:2px 0}
+.pindraft{background:#fff4d6;border:1px solid #e0c66a;border-radius:6px;padding:6px 8px;margin:6px 0;font-size:12px}
+#pinOutTx{width:100%;height:110px;font-size:11px;box-sizing:border-box;margin-top:4px}
 </style></head><body>
 <header><h1>國立臺南特殊教育學校・互動式 3D 防災地圖</h1>
 <nav><button id="b-campus" class="on">校園</button><button id="b-bld">教學大樓 3D</button><button id="b-aer">空拍圖</button><button id="ctl-t" onclick="toggleCtl()">操作選項 ▸</button><button id="info-t" onclick="toggleInfo()">防救災資訊 ▸</button><button id="facility-t" onclick="toggleFacility()">設施定位 ▸</button><button id="edit-t" title="僅編輯者可用">設施編輯 ▸</button><button id="save-pictures" class="save-btn" title="下載全部地圖底圖與目前 3D 畫面">⬇ 下載圖檔</button></nav></header>
@@ -74,15 +78,17 @@ button.on{background:var(--acc);border-color:var(--acc);color:#fff}.save-btn{bor
 <div id="wait" class="card hide"><button class="x" onclick="document.querySelector('#wait').classList.add('hide')" aria-label="關閉">×</button><h3 id="wait-t"></h3><div id="wait-d" class="mut"></div><div class="row"><button id="wait-go"></button></div></div>
 
 </div>
-<div id="pin-edit" class="card hide" aria-label="設施編輯"><button class="x" id="pin-close" aria-label="關閉設施編輯">×</button><h3 style="margin:0 0 4px">設施編輯</h3>
-<div class="mut">拖曳圖釘可移動；按「新增」後點地圖放置；Ctrl＋Z 復原。</div>
-<select id="pin-sel" style="width:100%;margin:6px 0"></select>
-<label class="mut">名稱（選取的設施）</label><input id="pin-name" style="width:100%;margin-bottom:6px">
-<div class="row"><input id="pin-newname" placeholder="新設施名稱" style="flex:1"><button id="pin-add">＋ 新增（點地圖放置）</button></div>
-<div class="row"><button id="pin-del">刪除選取</button><button id="pin-undo">復原 Ctrl+Z</button></div>
-<div class="row"><button id="pin-reset">還原原始位置</button><button id="pin-clear">清除草稿</button></div>
-<div class="row"><button id="pin-export" class="save-btn">匯出文字</button></div>
-<textarea id="pin-out" class="hide" style="width:100%;height:110px;font-size:11px"></textarea></div>
+<div id="pin-edit" class="card hide" aria-label="設施編輯">
+<div class="pinhead" id="pinHead" title="拖曳移動"><span aria-hidden="true">⠿</span> 設施編輯・拖曳移動<button class="x" id="pin-close" aria-label="關閉設施編輯">×</button></div>
+<p class="mut">直接拖曳 3D 圖示到正確位置；拖曳空白處仍可旋轉地圖。</p>
+<div id="pinDraft" class="pindraft" hidden>目前顯示的是尚未送出的位置調整（只存在這台裝置）。<button id="pinDiscard">捨棄草稿</button></div>
+<h4>選取的項目</h4><p id="pinSel" class="mut">尚未選取，點一下圖示即可選取。</p>
+<div class="row"><button id="pinDel" disabled>刪除選取的設施</button></div>
+<h4>新增設施</h4><p class="mut">新增後會出現在畫面中央，再拖到正確位置。</p>
+<div class="row"><input id="pinNewName" placeholder="設施名稱（未填則為「新設施」）" style="flex:1"><button id="pinAdd">＋ 新增設施</button></div>
+<div class="row"><button id="pinDone">完成並產生文字</button><button id="pinReset">全部還原成原始位置</button></div>
+<div id="pinOutBox" hidden><p class="mut">請把下面整段文字複製後貼給 Claude，我會更新到 GitHub。</p><textarea id="pinOutTx" readonly></textarea><div class="row"><button id="pinCopy">複製文字</button><span id="pinCopied" class="mut" hidden>已複製</span></div></div>
+</div>
 <div id="pin-gate" class="card hide"><button class="x" id="gate-close" aria-label="關閉">×</button><h3 style="margin:0 0 6px">設施編輯｜請輸入密碼</h3>
 <input id="gate-pw" type="password" autocomplete="current-password" style="width:100%;font:inherit;padding:5px 8px;border:1px solid var(--line);border-radius:6px;box-sizing:border-box">
 <label class="mut"><input type="checkbox" id="gate-show"> 顯示密碼</label><div class="row"><button id="gate-go" class="save-btn">確認</button></div><div id="gate-msg" class="mut" style="color:#b03a2e"></div></div>
@@ -340,33 +346,38 @@ async function saveMapImages(){const btn=$('#save-pictures'),old=btn.textContent
  const url=URL.createObjectURL(imageZip(files)),a=document.createElement('a');a.href=url;a.download='國立臺南特教學校_互動式3D地圖圖檔.zip';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000)
  }catch(e){alert('圖檔整理失敗，請重新載入頁面後再試。')}finally{btn.disabled=false;btn.textContent=old}}
 $('#save-pictures').onclick=saveMapImages;
-/* ── 設施編輯（與校園地圖相同的密碼與操作）── */
+/* ── 設施編輯（與校園地圖的編輯模式相同：選取、拖曳、新增、刪除、Ctrl+Z、草稿、完成並產生文字）── */
 const EDITOR_KEY='campus3d-acc-editor',EDITOR_HASH='428e9f391aa4c2e0cfd74000b8957e0a05c8fc17dd95d4b060a87d7c6b4bd7c8',DRAFT_KEY='disaster-pins-draft';
 const isEditor=()=>{try{return localStorage.getItem(EDITOR_KEY)===EDITOR_HASH}catch(e){return false}};
 const sha=async t=>{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')};
+const clampI=(v,lo,hi)=>Math.round(Math.min(hi,Math.max(lo,v)));
 const snap=()=>JSON.stringify(PINS);
+const isDirty=()=>snap()!==JSON.stringify(ORIG_PINS);
 function pushUndo(s){undoStack.push(s);if(undoStack.length>200)undoStack.shift()}
-function saveDraft(){try{localStorage.setItem(DRAFT_KEY,JSON.stringify(PINS))}catch(e){}}
-function refreshPinPanel(){const sel=$('#pin-sel');if(!sel)return;sel.innerHTML='';PINS.forEach(([x,y,nm],i)=>{const o=document.createElement('option');o.value=i;o.textContent=(i+1)+'. '+nm;sel.appendChild(o)});sel.value=selPin;$('#pin-name').value=selPin>=0?PINS[selPin][2]:''}
+function saveDraft(){try{if(isDirty())localStorage.setItem(DRAFT_KEY,snap());else localStorage.removeItem(DRAFT_KEY)}catch(e){}}
+function refreshPinPanel(){const sel=selPin>=0&&PINS[selPin];$('#pinSel').textContent=sel?sel[2]+'（第 '+(selPin+1)+' 個，可拖曳移動）':'尚未選取，點一下圖示即可選取。';$('#pinDel').disabled=!sel;$('#pinDraft').hidden=!isDirty()}
 function commit(before){if(before!==undefined)pushUndo(before);saveDraft();buildPins();refreshPinPanel()}
 function undoPins(){const s=undoStack.pop();if(s===undefined)return;PINS=JSON.parse(s);if(selPin>=PINS.length)selPin=-1;saveDraft();buildPins();refreshPinPanel()}
 const plane=new THREE.Plane(new THREE.Vector3(0,1,0),0),gp=new THREE.Vector3();
 function setPointer(e){const r=renderer.domElement.getBoundingClientRect();mp.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);ray.setFromCamera(mp,cam)}
-function groundAt(e){setPointer(e);if(!ray.ray.intersectPlane(plane,gp))return null;return{gx:Math.round((gp.x/CW+.5)*1070),gy:Math.round((gp.z/CH+.5)*691)}}
+function toMap(v){return{gx:clampI((v.x/CW+.5)*1070,0,2140),gy:clampI((v.z/CH+.5)*691,0,1382)}}
+function groundAt(e){setPointer(e);return ray.ray.intersectPlane(plane,gp)?toMap(gp):null}
+function centerGround(){mp.set(0,0);ray.setFromCamera(mp,cam);return ray.ray.intersectPlane(plane,gp)?toMap(gp):{gx:1070,gy:691}}
 function pickPin(e){setPointer(e);return ray.intersectObjects(pinHits,false)[0]}
 window.addEventListener('pointerdown',e=>{
   if(!editOn||mode!=='campus'||e.button!==0||e.target!==renderer.domElement)return;
-  const h=pickPin(e);
-  if(h){e.stopPropagation();const idx=h.object.userData.idx;selPin=idx;pinDrag={idx,start:snap(),moved:false};ctl.enabled=false;refreshPinPanel();buildPins();return}
-  if(addArmed){const g=groundAt(e);if(!g)return;e.stopPropagation();const before=snap();
-    PINS.push([g.gx,g.gy,($('#pin-newname').value.trim()||'新設施'),'custom-'+Date.now().toString(36)]);selPin=PINS.length-1;
-    addArmed=false;$('#pin-add').classList.remove('on');$('#pin-add').textContent='＋ 新增（點地圖放置）';$('#pin-newname').value='';commit(before)}
+  const h=pickPin(e);if(!h)return;
+  e.stopPropagation();const idx=h.object.userData.idx;selPin=idx;pinDrag={idx,start:snap(),moved:false};ctl.enabled=false;buildPins();refreshPinPanel();
 },true);
 window.addEventListener('pointermove',e=>{if(!pinDrag)return;const g=groundAt(e);if(!g)return;PINS[pinDrag.idx][0]=g.gx;PINS[pinDrag.idx][1]=g.gy;pinDrag.moved=true;buildPins()});
-const endDrag=()=>{if(!pinDrag)return;ctl.enabled=true;const d=pinDrag;pinDrag=null;if(d.moved){pushUndo(d.start);saveDraft();refreshPinPanel()}};
+const endDrag=()=>{if(!pinDrag)return;ctl.enabled=true;const d=pinDrag;pinDrag=null;if(d.moved)commit(d.start)};
 window.addEventListener('pointerup',endDrag);window.addEventListener('pointercancel',endDrag);
-window.addEventListener('keydown',e=>{if(!editOn)return;if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&e.key.toLowerCase()==='z'&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)){e.preventDefault();undoPins()}});
-function setEditOn(on){editOn=on;$('#pin-edit').classList.toggle('hide',!on);$('#edit-t').textContent='設施編輯'+(on?' ▾':' ▸');if(on&&mode!=='campus')setMode('campus');if(!on){addArmed=false;selPin=-1;buildPins()}refreshPinPanel()}
+function deleteSel(){if(selPin<0)return;const before=snap();PINS.splice(selPin,1);selPin=-1;commit(before)}
+window.addEventListener('keydown',e=>{
+  if(!editOn||/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))return;
+  if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&e.key.toLowerCase()==='z'){e.preventDefault();undoPins();return}
+  if((e.key==='Backspace'||e.key==='Delete')&&selPin>=0){e.preventDefault();deleteSel()}});
+function setEditOn(on){editOn=on;$('#pin-edit').classList.toggle('hide',!on);$('#edit-t').textContent='設施編輯'+(on?' ▾':' ▸');if(on&&mode!=='campus')setMode('campus');if(!on){selPin=-1;buildPins()}refreshPinPanel()}
 function openGate(){$('#pin-gate').classList.remove('hide');$('#gate-pw').value='';$('#gate-msg').textContent='';$('#gate-pw').focus()}
 $('#edit-t').onclick=()=>{if(!isEditor()){openGate();return}setEditOn(!editOn)};
 $('#gate-close').onclick=()=>$('#pin-gate').classList.add('hide');
@@ -376,13 +387,17 @@ $('#gate-go').onclick=async()=>{let h='';try{h=await sha('campus3d-acc:'+$('#gat
   if(h!==EDITOR_HASH){$('#gate-msg').textContent='密碼不正確，請再試一次。';$('#gate-pw').select();return}
   try{localStorage.setItem(EDITOR_KEY,EDITOR_HASH)}catch(e){}$('#pin-gate').classList.add('hide');setEditOn(true)};
 $('#pin-close').onclick=()=>setEditOn(false);
-$('#pin-sel').onchange=e=>{selPin=+e.target.value;buildPins();refreshPinPanel()};
-$('#pin-name').onchange=e=>{if(selPin<0)return;const before=snap();PINS[selPin][2]=e.target.value.trim()||PINS[selPin][2];commit(before)};
-$('#pin-add').onclick=()=>{addArmed=!addArmed;$('#pin-add').classList.toggle('on',addArmed);$('#pin-add').textContent=addArmed?'點地圖放置…（再按取消）':'＋ 新增（點地圖放置）'};
-$('#pin-del').onclick=()=>{if(selPin<0)return;const before=snap();PINS.splice(selPin,1);selPin=-1;commit(before)};
-$('#pin-undo').onclick=undoPins;
-$('#pin-reset').onclick=()=>{if(!confirm('還原為原始設施位置？（可用 Ctrl＋Z 復原）'))return;const before=snap();PINS=JSON.parse(JSON.stringify(ORIG_PINS));selPin=-1;commit(before)};
-$('#pin-clear').onclick=()=>{if(!confirm('清除這台裝置的設施草稿，回到原始位置？'))return;const before=snap();try{localStorage.removeItem(DRAFT_KEY)}catch(e){}PINS=JSON.parse(JSON.stringify(ORIG_PINS));selPin=-1;commit(before)};
-$('#pin-export').onclick=()=>{const t=$('#pin-out');t.classList.remove('hide');t.value='let PINS='+JSON.stringify(PINS)+';';t.select()};
+$('#pinAdd').onclick=()=>{const before=snap();const g=centerGround();const nm=$('#pinNewName').value.trim()||'新設施';PINS.push([g.gx,g.gy,nm,'custom-'+Date.now().toString(36)]);selPin=PINS.length-1;$('#pinNewName').value='';commit(before)};
+$('#pinDel').onclick=deleteSel;
+function resetAll(){const before=snap();PINS=JSON.parse(JSON.stringify(ORIG_PINS));selPin=-1;commit(before)}
+$('#pinReset').onclick=()=>{if(confirm('全部還原成原始位置？（可用 Ctrl＋Z 復原）'))resetAll()};
+$('#pinDiscard').onclick=()=>{if(confirm('捨棄這台裝置尚未送出的調整，回到原始位置？'))resetAll()};
+$('#pinDone').onclick=()=>{const t=$('#pinOutTx');t.value='【防災地圖設施位置調整】\n共 '+PINS.length+' 個設施（x, y, 名稱, 代號）\n'+JSON.stringify(PINS)+'\n';$('#pinOutBox').hidden=false;t.focus();t.select()};
+$('#pinCopy').onclick=()=>{const t=$('#pinOutTx'),ok=()=>{const c=$('#pinCopied');c.hidden=false;setTimeout(()=>c.hidden=true,1800)},fb=()=>{t.select();try{document.execCommand('copy')}catch(e){}ok()};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t.value).then(ok,fb);else fb()};
+(()=>{const h=$('#pinHead'),p=$('#pin-edit');let d=null;
+  h.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;const r=p.getBoundingClientRect();d={dx:e.clientX-r.left,dy:e.clientY-r.top};h.setPointerCapture(e.pointerId)});
+  h.addEventListener('pointermove',e=>{if(!d)return;p.style.left=(e.clientX-d.dx)+'px';p.style.top=(e.clientY-d.dy)+'px';p.style.right='auto'});
+  h.addEventListener('pointerup',()=>{d=null})})();
 init().then(()=>{if(location.hash==='#edit'){if(isEditor())setEditOn(true);else openGate()}});
 </script></body></html>
