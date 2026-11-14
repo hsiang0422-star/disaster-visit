@@ -41,9 +41,15 @@ button.on{background:var(--acc);border-color:var(--acc);color:#fff}.save-btn{bor
 #aer img{position:absolute;left:0;top:0;transform-origin:0 0;user-select:none;-webkit-user-drag:none}
 .hide{display:none!important}
 @media(max-width:760px){html,body{height:auto;min-height:100%}body{min-height:100vh;overflow:auto}header{align-items:flex-start}header nav{width:100%}#stage{flex:none;height:58vh;min-height:240px}#toolbar-panels.open{width:min(340px,calc(100vw - 16px));max-height:min(55vh,460px)}}
+#pin-edit,#pin-gate{position:fixed;max-width:calc(100% - 24px);box-sizing:border-box}
+#pin-edit{right:10px;top:110px;width:270px;padding:10px 12px;z-index:50;max-height:calc(100vh - 130px);overflow:auto}
+#pin-gate{left:50%;top:34%;transform:translateX(-50%);width:300px;z-index:60;padding:14px}
+#pin-edit.hide,#pin-gate.hide{display:none}#pin-edit input,#pin-edit select,#pin-gate input{font:inherit;font-size:12px;padding:3px 6px;border:1px solid var(--line);border-radius:5px;box-sizing:border-box}
+#pin-edit .x,#pin-gate .x{position:absolute;right:6px;top:4px;border:0;background:none;font-size:16px;padding:0 4px}
+#pin-edit button.on{background:var(--acc);color:#fff}
 </style></head><body>
 <header><h1>國立臺南特殊教育學校・互動式 3D 防災地圖</h1>
-<nav><button id="b-campus" class="on">校園</button><button id="b-bld">教學大樓 3D</button><button id="b-aer">空拍圖</button><button id="ctl-t" onclick="toggleCtl()">操作選項 ▸</button><button id="info-t" onclick="toggleInfo()">防救災資訊 ▸</button><button id="facility-t" onclick="toggleFacility()">設施定位 ▸</button><button id="save-pictures" class="save-btn" title="下載全部地圖底圖與目前 3D 畫面">⬇ 下載圖檔</button></nav></header>
+<nav><button id="b-campus" class="on">校園</button><button id="b-bld">教學大樓 3D</button><button id="b-aer">空拍圖</button><button id="ctl-t" onclick="toggleCtl()">操作選項 ▸</button><button id="info-t" onclick="toggleInfo()">防救災資訊 ▸</button><button id="facility-t" onclick="toggleFacility()">設施定位 ▸</button><button id="edit-t" title="僅編輯者可用">設施編輯 ▸</button><button id="save-pictures" class="save-btn" title="下載全部地圖底圖與目前 3D 畫面">⬇ 下載圖檔</button></nav></header>
 <div id="toolbar-panels" aria-label="操作選項、防救災資訊與設施定位"><div id="toolbar-drag-handle" aria-label="按住拖曳移動選項框">⠿　<span class="toolbar-hint">拖曳移動・調整大小</span><button id="toolbar-close" type="button" aria-label="關閉操作選項" title="關閉">×</button></div><div id="ctl-b" class="card toolbar-card hide">
 
 <div id="c-campus"><h3>校園 3D</h3><div class="mut">拖曳方式可分別選擇平移或旋轉；滾輪或雙指縮放。若要查看樓層，請點上方「教學大樓 3D」按鈕。</div>
@@ -68,6 +74,18 @@ button.on{background:var(--acc);border-color:var(--acc);color:#fff}.save-btn{bor
 <div id="wait" class="card hide"><button class="x" onclick="document.querySelector('#wait').classList.add('hide')" aria-label="關閉">×</button><h3 id="wait-t"></h3><div id="wait-d" class="mut"></div><div class="row"><button id="wait-go"></button></div></div>
 
 </div>
+<div id="pin-edit" class="card hide" aria-label="設施編輯"><button class="x" id="pin-close" aria-label="關閉設施編輯">×</button><h3 style="margin:0 0 4px">設施編輯</h3>
+<div class="mut">拖曳圖釘可移動；按「新增」後點地圖放置；Ctrl＋Z 復原。</div>
+<select id="pin-sel" style="width:100%;margin:6px 0"></select>
+<label class="mut">名稱（選取的設施）</label><input id="pin-name" style="width:100%;margin-bottom:6px">
+<div class="row"><input id="pin-newname" placeholder="新設施名稱" style="flex:1"><button id="pin-add">＋ 新增（點地圖放置）</button></div>
+<div class="row"><button id="pin-del">刪除選取</button><button id="pin-undo">復原 Ctrl+Z</button></div>
+<div class="row"><button id="pin-reset">還原原始位置</button><button id="pin-clear">清除草稿</button></div>
+<div class="row"><button id="pin-export" class="save-btn">匯出文字</button></div>
+<textarea id="pin-out" class="hide" style="width:100%;height:110px;font-size:11px"></textarea></div>
+<div id="pin-gate" class="card hide"><button class="x" id="gate-close" aria-label="關閉">×</button><h3 style="margin:0 0 6px">設施編輯｜請輸入密碼</h3>
+<input id="gate-pw" type="password" autocomplete="current-password" style="width:100%;font:inherit;padding:5px 8px;border:1px solid var(--line);border-radius:6px;box-sizing:border-box">
+<label class="mut"><input type="checkbox" id="gate-show"> 顯示密碼</label><div class="row"><button id="gate-go" class="save-btn">確認</button></div><div id="gate-msg" class="mut" style="color:#b03a2e"></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script>
@@ -111,7 +129,8 @@ const S=40/1387,W1=1602,H1=952,KG=.36,GS=KG*(2*CW/2140)/S;
 const fx=(f,px)=>(f.s*px+f.tx-W1/2)*S,fz=(f,py)=>(f.s*py+f.ty-H1/2)*S;
 function addAEDMarker(group,f,x,y){const px=fx(f,x),pz=fz(f,y),ring=new THREE.Mesh(new THREE.RingGeometry(.42,.58,32),new THREE.MeshBasicMaterial({color:0xffc928,side:THREE.DoubleSide,depthTest:false}));ring.rotation.x=-Math.PI/2;ring.position.set(px,.08,pz);ring.renderOrder=8;group.add(ring);const pin=label('AED',1.25,'#fff','#c62828');pin.position.set(px,.13,pz);group.add(pin)}
 const BLD=[[70,100,140,155,3,'校舍'],[245,95,115,110,3,'校舍'],[370,95,115,110,3,'校舍'],[500,100,290,115,3,'教學大樓（示意位置）','tb'],[695,215,135,105,3,'教學大樓（示意位置）','tb'],[685,320,145,280,3,'教學大樓（示意位置）','tb'],[840,160,100,140,2,'禮堂']];
-const PINS=[[350,330,'指揮中心','command'],[350,415,'防災倉庫','warehouse'],[480,380,'最終集合地點','assembly'],[545,343,'急救站','firstaid'],[980,317,'警衛室','guard'],[825,45,'交流門','gate'],[397,328,'室外避難處','outdoor'],[660,190,'健康中心','health'],[765,124,'AED','aed-1f'],[761,167,'AED','aed-3f'],[140,180,'AED','aed-dorm'],[907,273,'通訊設備放置點','comms'],[905,285,'救援器材放置點','rescue'],[950,342,'災時家長接送區','pickup']];
+let PINS=[[350,330,'指揮中心','command'],[350,415,'防災倉庫','warehouse'],[480,380,'最終集合地點','assembly'],[545,343,'急救站','firstaid'],[980,317,'警衛室','guard'],[825,45,'交流門','gate'],[397,328,'室外避難處','outdoor'],[660,190,'健康中心','health'],[765,124,'AED','aed-1f'],[761,167,'AED','aed-3f'],[140,180,'AED','aed-dorm'],[907,273,'通訊設備放置點','comms'],[905,285,'救援器材放置點','rescue'],[950,342,'災時家長接送區','pickup']];
+const ORIG_PINS=JSON.parse(JSON.stringify(PINS));let editOn=false,selPin=-1,pinDrag=null,addArmed=false;const pinHits=[],undoStack=[];try{if(localStorage.getItem('campus3d-acc-editor')==='428e9f391aa4c2e0cfd74000b8957e0a05c8fc17dd95d4b060a87d7c6b4bd7c8'){const d=JSON.parse(localStorage.getItem('disaster-pins-draft')||'null');if(Array.isArray(d))PINS=d;}}catch(e){}
 const evacuationPaths=[
  // 教學大樓西側紅色箭頭：沿箭頭向西南匯流，最後抵達校園圖上的最終集合點標記。
  [[1385,465],[1370,490],[1348,520],[1300,560],[1250,630],[1195,735],[1100,750],[1030,755],[960,760]],
@@ -171,6 +190,18 @@ view.id=0;
 function inst(mesh,rects,u,f,sy){const m=new THREE.Matrix4(),q=new THREE.Quaternion(),sc=new THREE.Vector3(),p=new THREE.Vector3();
  rects.forEach((r,i)=>{const w=r[2]*u*f.s*S,d=r[3]*u*f.s*S;p.set(fx(f,r[0]*u)+w/2,0,fz(f,r[1]*u)+d/2);sc.set(w,sy,d);m.compose(p,q,sc);mesh.setMatrixAt(i,m)})}
 const unit=ty=>{const g=new THREE.BoxGeometry(1,1,1);g.translate(0,ty,0);return g};
+/* 設施圖釘：可重建（編輯模式移動、新增、刪除後重新畫） */
+function buildPins(){
+  pins.children.filter(o=>o.userData&&o.userData.fromPin).forEach(o=>pins.remove(o));
+  rings=rings.filter(r=>!(r.userData&&r.userData.fromPin));pinHits.length=0;
+  PINS.forEach(([x,y,nm,key],idx)=>{const n0=pins.children.length;const[wx,wz]=g2w(x,y);
+    const l=label(nm,1.3,'#fff',idx===selPin?'rgba(230,120,0,.95)':'rgba(20,110,60,.92)');l.position.set(wx,3.6,wz);pins.add(l);leader(wx,wz,.18,2.95);
+    const r=new THREE.Mesh(new THREE.RingGeometry(.5,.7,40),new THREE.MeshBasicMaterial({color:idx===selPin?0xff8a00:0x1fa35c,transparent:true,side:THREE.DoubleSide}));
+    r.rotation.x=-Math.PI/2;r.position.set(wx,.06,wz);r.userData={pinKey:key,idx};pins.add(r);rings.push(r);
+    const hit=new THREE.Mesh(new THREE.SphereGeometry(1.4,12,8),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));hit.position.set(wx,.8,wz);hit.userData={idx};pins.add(hit);pinHits.push(hit);
+    for(let k=n0;k<pins.children.length;k++)pins.children[k].userData=Object.assign({},pins.children[k].userData,{fromPin:true});
+    r.userData.fromPin=true;hit.userData.fromPin=true;});
+}
 async function init(){
  const [cm,ae,...pl]=await Promise.all([D.img.campus,D.img.aerial,...D.floors.map(f=>f.plan)].map(loadImg));
  $('#aerimg').src=D.img.aerial;
@@ -213,9 +244,7 @@ async function init(){
   const rg=new THREE.Mesh(new THREE.RingGeometry(1,1.2,40),new THREE.MeshBasicMaterial({color:0x2e9e4f,transparent:true,side:THREE.DoubleSide}));rg.rotation.x=-Math.PI/2;rg.position.copy(sq.position);rg.userData={s:.9,pinKey:k==='f2'?'wait2':'wait3'};
   const l=label(nm,1.2,'#fff','rgba(46,158,79,.95)');l.position.set(wx,ry+1.7,wz);leader(wx,wz,ry,ry+1.1);
   [sq,l].forEach(o=>{o.userData={wait:k,nm};pins.add(o);waits.push(o)});pins.add(rg);rings.push(rg)});
- PINS.forEach(([x,y,nm,key])=>{const[wx,wz]=g2w(x,y);const l=label(nm,1.3,'#fff','rgba(20,110,60,.92)');l.position.set(wx,3.6,wz);pins.add(l);leader(wx,wz,.18,2.95);
-  const r=new THREE.Mesh(new THREE.RingGeometry(.5,.7,40),new THREE.MeshBasicMaterial({color:0x1fa35c,transparent:true,side:THREE.DoubleSide}));
-  r.rotation.x=-Math.PI/2;r.position.set(wx,.06,wz);r.userData.pinKey=key;pins.add(r);rings.push(r)});
+ buildPins();
  
  setMode('campus');resize();loop();
 }
@@ -311,5 +340,49 @@ async function saveMapImages(){const btn=$('#save-pictures'),old=btn.textContent
  const url=URL.createObjectURL(imageZip(files)),a=document.createElement('a');a.href=url;a.download='國立臺南特教學校_互動式3D地圖圖檔.zip';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000)
  }catch(e){alert('圖檔整理失敗，請重新載入頁面後再試。')}finally{btn.disabled=false;btn.textContent=old}}
 $('#save-pictures').onclick=saveMapImages;
-init();
+/* ── 設施編輯（與校園地圖相同的密碼與操作）── */
+const EDITOR_KEY='campus3d-acc-editor',EDITOR_HASH='428e9f391aa4c2e0cfd74000b8957e0a05c8fc17dd95d4b060a87d7c6b4bd7c8',DRAFT_KEY='disaster-pins-draft';
+const isEditor=()=>{try{return localStorage.getItem(EDITOR_KEY)===EDITOR_HASH}catch(e){return false}};
+const sha=async t=>{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')};
+const snap=()=>JSON.stringify(PINS);
+function pushUndo(s){undoStack.push(s);if(undoStack.length>200)undoStack.shift()}
+function saveDraft(){try{localStorage.setItem(DRAFT_KEY,JSON.stringify(PINS))}catch(e){}}
+function refreshPinPanel(){const sel=$('#pin-sel');if(!sel)return;sel.innerHTML='';PINS.forEach(([x,y,nm],i)=>{const o=document.createElement('option');o.value=i;o.textContent=(i+1)+'. '+nm;sel.appendChild(o)});sel.value=selPin;$('#pin-name').value=selPin>=0?PINS[selPin][2]:''}
+function commit(before){if(before!==undefined)pushUndo(before);saveDraft();buildPins();refreshPinPanel()}
+function undoPins(){const s=undoStack.pop();if(s===undefined)return;PINS=JSON.parse(s);if(selPin>=PINS.length)selPin=-1;saveDraft();buildPins();refreshPinPanel()}
+const plane=new THREE.Plane(new THREE.Vector3(0,1,0),0),gp=new THREE.Vector3();
+function setPointer(e){const r=renderer.domElement.getBoundingClientRect();mp.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);ray.setFromCamera(mp,cam)}
+function groundAt(e){setPointer(e);if(!ray.ray.intersectPlane(plane,gp))return null;return{gx:Math.round((gp.x/CW+.5)*1070),gy:Math.round((gp.z/CH+.5)*691)}}
+function pickPin(e){setPointer(e);return ray.intersectObjects(pinHits,false)[0]}
+window.addEventListener('pointerdown',e=>{
+  if(!editOn||mode!=='campus'||e.button!==0||e.target!==renderer.domElement)return;
+  const h=pickPin(e);
+  if(h){e.stopPropagation();const idx=h.object.userData.idx;selPin=idx;pinDrag={idx,start:snap(),moved:false};ctl.enabled=false;refreshPinPanel();buildPins();return}
+  if(addArmed){const g=groundAt(e);if(!g)return;e.stopPropagation();const before=snap();
+    PINS.push([g.gx,g.gy,($('#pin-newname').value.trim()||'新設施'),'custom-'+Date.now().toString(36)]);selPin=PINS.length-1;
+    addArmed=false;$('#pin-add').classList.remove('on');$('#pin-add').textContent='＋ 新增（點地圖放置）';$('#pin-newname').value='';commit(before)}
+},true);
+window.addEventListener('pointermove',e=>{if(!pinDrag)return;const g=groundAt(e);if(!g)return;PINS[pinDrag.idx][0]=g.gx;PINS[pinDrag.idx][1]=g.gy;pinDrag.moved=true;buildPins()});
+const endDrag=()=>{if(!pinDrag)return;ctl.enabled=true;const d=pinDrag;pinDrag=null;if(d.moved){pushUndo(d.start);saveDraft();refreshPinPanel()}};
+window.addEventListener('pointerup',endDrag);window.addEventListener('pointercancel',endDrag);
+window.addEventListener('keydown',e=>{if(!editOn)return;if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&e.key.toLowerCase()==='z'&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)){e.preventDefault();undoPins()}});
+function setEditOn(on){editOn=on;$('#pin-edit').classList.toggle('hide',!on);$('#edit-t').textContent='設施編輯'+(on?' ▾':' ▸');if(on&&mode!=='campus')setMode('campus');if(!on){addArmed=false;selPin=-1;buildPins()}refreshPinPanel()}
+function openGate(){$('#pin-gate').classList.remove('hide');$('#gate-pw').value='';$('#gate-msg').textContent='';$('#gate-pw').focus()}
+$('#edit-t').onclick=()=>{if(!isEditor()){openGate();return}setEditOn(!editOn)};
+$('#gate-close').onclick=()=>$('#pin-gate').classList.add('hide');
+$('#gate-show').onchange=e=>{$('#gate-pw').type=e.target.checked?'text':'password'};
+$('#gate-pw').addEventListener('keydown',e=>{if(e.key==='Enter')$('#gate-go').click()});
+$('#gate-go').onclick=async()=>{let h='';try{h=await sha('campus3d-acc:'+$('#gate-pw').value.normalize('NFKC').replace(/\s+/g,'').toLowerCase())}catch(e){$('#gate-msg').textContent='這個瀏覽器無法驗證密碼，請改用 https 網址開啟。';return}
+  if(h!==EDITOR_HASH){$('#gate-msg').textContent='密碼不正確，請再試一次。';$('#gate-pw').select();return}
+  try{localStorage.setItem(EDITOR_KEY,EDITOR_HASH)}catch(e){}$('#pin-gate').classList.add('hide');setEditOn(true)};
+$('#pin-close').onclick=()=>setEditOn(false);
+$('#pin-sel').onchange=e=>{selPin=+e.target.value;buildPins();refreshPinPanel()};
+$('#pin-name').onchange=e=>{if(selPin<0)return;const before=snap();PINS[selPin][2]=e.target.value.trim()||PINS[selPin][2];commit(before)};
+$('#pin-add').onclick=()=>{addArmed=!addArmed;$('#pin-add').classList.toggle('on',addArmed);$('#pin-add').textContent=addArmed?'點地圖放置…（再按取消）':'＋ 新增（點地圖放置）'};
+$('#pin-del').onclick=()=>{if(selPin<0)return;const before=snap();PINS.splice(selPin,1);selPin=-1;commit(before)};
+$('#pin-undo').onclick=undoPins;
+$('#pin-reset').onclick=()=>{if(!confirm('還原為原始設施位置？（可用 Ctrl＋Z 復原）'))return;const before=snap();PINS=JSON.parse(JSON.stringify(ORIG_PINS));selPin=-1;commit(before)};
+$('#pin-clear').onclick=()=>{if(!confirm('清除這台裝置的設施草稿，回到原始位置？'))return;const before=snap();try{localStorage.removeItem(DRAFT_KEY)}catch(e){}PINS=JSON.parse(JSON.stringify(ORIG_PINS));selPin=-1;commit(before)};
+$('#pin-export').onclick=()=>{const t=$('#pin-out');t.classList.remove('hide');t.value='let PINS='+JSON.stringify(PINS)+';';t.select()};
+init().then(()=>{if(location.hash==='#edit'){if(isEditor())setEditOn(true);else openGate()}});
 </script></body></html>
