@@ -56,7 +56,7 @@ button.on{background:var(--acc);border-color:var(--acc);color:#fff}.save-btn{bor
 <nav><button id="b-campus" class="on">校園</button><button id="b-bld">教學大樓 3D</button><button id="b-aer">空拍圖</button><button id="ctl-t" onclick="toggleCtl()">操作選項 ▸</button><button id="info-t" onclick="toggleInfo()">防救災資訊 ▸</button><button id="facility-t" onclick="toggleFacility()">設施定位 ▸</button><button id="edit-t" title="僅編輯者可用">設施編輯 ▸</button><button id="save-pictures" class="save-btn" title="下載全部地圖底圖與目前 3D 畫面">⬇ 下載圖檔</button></nav></header>
 <div id="toolbar-panels" aria-label="操作選項、防救災資訊與設施定位"><div id="toolbar-drag-handle" aria-label="按住拖曳移動選項框">⠿　<span class="toolbar-hint">拖曳移動・調整大小</span><button id="toolbar-close" type="button" aria-label="關閉操作選項" title="關閉">×</button></div><div id="ctl-b" class="card toolbar-card hide">
 
-<div id="c-campus"><h3>校園 3D</h3><div class="mut">拖曳旋轉・Shift＋拖曳平移・滾輪縮放・雙指可平移（也可用下方按鈕把拖曳切換成平移）。若要查看樓層，請點上方「教學大樓 3D」按鈕。</div>
+<div id="c-campus"><h3>校園 3D</h3><div class="mut">拖曳旋轉・Shift＋拖曳平移・滾輪縮放・雙指可平移（也可用下方按鈕把拖曳切換成平移）。點地圖上的教學大樓，或上方「教學大樓 3D」按鈕，可查看各樓層。</div>
 <div class="row"><button id="v-iso">斜視</button><button id="v-top">俯視</button><button class="mode-pan">拖曳：平移</button><button class="mode-rotate">拖曳：旋轉</button></div>
 <div class="row"><label class="mut"><input type="checkbox" id="k-wall" checked> 建築量體</label><label class="mut"><input type="checkbox" id="k-pin" checked> 設施標示</label><label class="mut"><input type="checkbox" id="k-roof" checked> 教學大樓屋頂</label><label class="mut"><input type="checkbox" id="k-walk" checked> 疏散人流（200人）</label></div></div>
 <div id="c-bld" class="hide"><h3>教學大樓 1F–3F</h3>
@@ -299,9 +299,12 @@ const ray=new THREE.Raycaster(),mp=new THREE.Vector2(),tip=$('#tip');let down=nu
 function pick(ev){const r=renderer.domElement.getBoundingClientRect();mp.set((ev.clientX-r.left)/r.width*2-1,-((ev.clientY-r.top)/r.height)*2+1);ray.setFromCamera(mp,cam);
  const list=(walls.visible?hits:[]).concat(pins.visible?waits:[]);return ray.intersectObjects(list,false)[0]}
 renderer.domElement.addEventListener('pointermove',ev=>{if(mode!=='campus'){tip.style.display='none';return}
- const h=pick(ev);if(h){const u=h.object.userData;tip.textContent=u.wait?u.nm+'（點擊查看說明）':u.nm;tip.style.display='block';tip.style.left=ev.offsetX+12+'px';tip.style.top=ev.offsetY+12+'px';renderer.domElement.style.cursor=u.wait?'pointer':'grab'}else{tip.style.display='none';renderer.domElement.style.cursor='grab'}});
+ const h=pick(ev);if(h){const u=h.object.userData,tb=isTeach(u);tip.textContent=u.wait?u.nm+'（點擊查看說明）':tb?'教學大樓（點擊查看各樓層）':u.nm;tip.style.display='block';tip.style.left=ev.offsetX+12+'px';tip.style.top=ev.offsetY+12+'px';renderer.domElement.style.cursor=(u.wait||tb)?'pointer':'grab'}else{tip.style.display='none';renderer.domElement.style.cursor='grab'}});
 renderer.domElement.addEventListener('pointerdown',e=>down=[e.clientX,e.clientY]);
-renderer.domElement.addEventListener('pointerup',ev=>{if(mode!=='campus'||!down||Math.hypot(ev.clientX-down[0],ev.clientY-down[1])>5)return;const h=pick(ev);if(!h)return;const u=h.object.userData;if(u.wait)showWait(u.wait)});
+renderer.domElement.addEventListener('pointerup',ev=>{if(mode!=='campus'||!down||Math.hypot(ev.clientX-down[0],ev.clientY-down[1])>5)return;const h=pick(ev);if(!h)return;const u=h.object.userData;if(u.wait)showWait(u.wait);else if(isTeach(u))showTeachFloors()});
+// 點教學大樓：切到「教學大樓 3D」整棟，各樓層分開並以斜視顯示
+function isTeach(u){return !!(u&&(u.tag||/^教學大樓/.test(u.nm||'')))}
+function showTeachFloors(){tip.style.display='none';setMode('bld');focus='all';updateFloorBadge();document.querySelectorAll('[data-f]').forEach(b=>b.classList.toggle('on',b.dataset.f==='all'));if(extra<5){extra=5;$('#gap').value=5}layout();view([30,26,48],[0,7,0],900)}
 let az={s:1,x:0,y:0};const ai=$('#aerimg'),av=$('#aer');
 function applyAer(){ai.style.transform=`translate(${az.x}px,${az.y}px) scale(${az.s})`}
 function resetAer(){const w=av.clientWidth,h=av.clientHeight,iw=ai.naturalWidth||876,ih=ai.naturalHeight||1144;az.s=Math.min(w/iw,h/ih);az.x=(w-iw*az.s)/2;az.y=(h-ih*az.s)/2;applyAer()}
